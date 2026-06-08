@@ -4,83 +4,44 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  workflow_call:
-    inputs:
-      content_repo:
-        description: 'Source repo (owner/repo) to pull docs from'
-        required: false
-        default: ''
-        type: string
-      content_path:
-        description: 'Path within content_repo containing markdown docs'
-        required: false
-        default: 'docs'
-        type: string
-      base_path:
-        description: 'URL base path for GitHub Pages (e.g. /repo-name)'
-        required: false
-        default: ''
-        type: string
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
-      - name: Checkout mdsite
-        if: ${{ inputs.content_repo != '' }}
-        uses: actions/checkout@v4
-        with:
-          repository: kotulc/mdsite
+      - uses: actions/checkout@v4
 
-      - name: Checkout (direct)
-        if: ${{ !inputs.content_repo }}
-        uses: actions/checkout@v4
-
-      - name: Checkout content repo
-        if: ${{ inputs.content_repo != '' }}
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ inputs.content_repo }}
-          path: _content
-
-      - name: Override site config
-        if: ${{ inputs.content_repo != '' }}
-        run: |
-          if [ -f _content/site.config.js ]; then
-            cp _content/site.config.js site.config.js
-            echo "Using site.config.js from ${{ inputs.content_repo }}"
-          else
-            echo "No site.config.js in content repo; using mdsite defaults"
-          fi
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
       - name: Ingest content
         run: |
-          if [ -n "${{ inputs.content_repo }}" ]; then
-            npm run ingest -- "_content/${{ inputs.content_path }}"
-          else
-            SRC="${{ vars.CONTENT_SOURCE }}"
-            npm run ingest ${SRC:+-- "$SRC"}
-          fi
+          SRC="${{ vars.CONTENT_SOURCE }}"
+          npm run ingest ${SRC:+-- "$SRC"}
 
       - name: Build
         run: npm run build
         env:
-          BASE_PATH: ${{ inputs.base_path || vars.BASE_PATH || '' }}
+          BASE_PATH: ${{ vars.BASE_PATH }}
 
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v3
+      - uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

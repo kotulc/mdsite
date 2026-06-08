@@ -7,6 +7,6 @@ public/images/
 public/posts-index.json
 
 # Build output
-out/
+dist/
 .next/
 node_modules/

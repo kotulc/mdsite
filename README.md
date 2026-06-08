@@ -145,24 +145,14 @@ npm run preview    # serve the built out/ directory
 The included workflow (`.github/workflows/deploy.yml`) builds and deploys automatically
 on every push to `main`. Follow these steps to enable it for the first time:
 
-**1. Push to GitHub**
-```bash
-git add .
-git commit -m "Add docs content and configure deployment"
-git push
-```
+**1. Enable GitHub Pages** *(one-time setup)*
 
-This first push creates the `gh-pages` branch automatically.
-
-**2. Enable GitHub Pages** *(one-time setup — do this after the first push)*
-
-Go to your repository on GitHub:
+Go to your repository on GitHub — do this before the first push:
 - **Settings → Pages → Build and deployment**
-- Set **Source** to `Deploy from a branch`
-- Set **Branch** to `gh-pages`, folder `/ (root)`
+- Set **Source** to `GitHub Actions`
 - Click **Save**
 
-**3. Set the BASE_PATH variable** *(project pages repos only)*
+**2. Set the BASE_PATH variable** *(project pages repos only)*
 
 If your site lives at a subpath (e.g. `username.github.io/repo-name`), set this variable:
 - **Settings → Secrets and variables → Actions → Variables → New repository variable**
@@ -170,93 +160,18 @@ If your site lives at a subpath (e.g. `username.github.io/repo-name`), set this 
 
 Skip this step if you are deploying to a root domain (`username.github.io`).
 
-**4. Watch the workflow**
+**3. Push to GitHub**
+```bash
+git add .
+git commit -m "Add docs content and configure deployment"
+git push
+```
 
-Go to the **Actions** tab on GitHub. The "Deploy to GitHub Pages" workflow should be running
-(or complete). A green checkmark means the deploy succeeded.
-
-**5. Access the live site**
-
-Your site will be live at:
+The workflow runs automatically. Go to the **Actions** tab to watch progress — a green
+checkmark means the deploy succeeded. Your site will be live at:
 ```
 https://<username>.github.io/<repo-name>/
 ```
-GitHub Pages can take 1–2 minutes to propagate after the first deploy.
-
-
-## Using as a Reusable Workflow
-
-Any GitHub repository can publish its docs folder to GitHub Pages using mdsite as the build
-engine — no cloning or forking required. The deploy workflow supports `workflow_call` so other
-repos can call it directly.
-
-### Setup in the calling repo
-
-**1. Create a site config**
-
-Add `site.config.js` to the root of your repo. The workflow will copy it over mdsite's defaults
-before building:
-
-```js
-module.exports = {
-  title: 'My Project',
-  base_url: 'https://username.github.io',
-  base_path: '/repo-name',
-  repo_url: 'https://github.com/username/repo-name',
-}
-```
-
-**2. Add the caller workflow**
-
-Create `.github/workflows/publish-docs.yml`:
-
-```yaml
-name: Publish Docs
-
-on:
-  push:
-    branches: [main]
-    paths: ['docs/**', 'site.config.js']
-  workflow_dispatch:
-
-jobs:
-  publish:
-    uses: kotulc/mdsite/.github/workflows/deploy.yml@main
-    permissions:
-      contents: write
-    with:
-      content_repo: owner/repo-name
-      content_path: docs
-      base_path: /repo-name
-```
-
-Replace `owner/repo-name` with your GitHub repository slug and `/repo-name` with the
-subpath where your GitHub Pages site lives.
-
-**3. Trigger the first deploy**
-
-Push to `main` (or trigger manually via **Actions → Publish Docs → Run workflow**). This
-creates the `gh-pages` branch in your repo.
-
-**4. Enable GitHub Pages** *(one-time setup — do this after the first push)*
-
-In your repo on GitHub:
-- **Settings → Pages → Build and deployment**
-- Set **Source** to `Deploy from a branch`
-- Set **Branch** to `gh-pages`, folder `/ (root)`
-
-All subsequent pushes to `docs/` or `site.config.js` deploy automatically from here.
-
-### How it works
-
-The reusable workflow:
-1. Checks out `kotulc/mdsite` for the build tooling
-2. Checks out your repo into `_content/`
-3. Copies your `site.config.js` if present
-4. Ingests your docs, builds, and pushes to your repo's `gh-pages` branch
-
-`GITHUB_TOKEN` in a called workflow resolves to the **calling repo's** token, so the deploy
-always targets your repo's `gh-pages` — not mdsite's.
 
 
 ## Integrations

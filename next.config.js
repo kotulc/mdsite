@@ -10,6 +10,7 @@ const basePath = process.env.NODE_ENV === 'production'
 
 module.exports = withNextra({
   output: 'export',
+  distDir: 'dist',
   trailingSlash: true,
   images: { unoptimized: true },
   basePath,

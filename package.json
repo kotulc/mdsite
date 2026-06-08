@@ -7,7 +7,7 @@
     "ingest": "node scripts/ingest.js",
     "dev": "next dev",
     "build": "next build",
-    "preview": "npx serve out",
+    "preview": "npx serve dist",
     "watch": "node scripts/watch.js",
     "test": "jest"
   },
