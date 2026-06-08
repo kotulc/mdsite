@@ -19,7 +19,7 @@ related:
 
 # Future Plans
 
-Phase 1 of `nlp-mdsite` is complete. The core pipeline — markdown ingestion, metadata
+Phase 1 of `mdsite` is complete. The core pipeline — markdown ingestion, metadata
 display, navigation, theming, and GitHub Pages deployment — is fully functional.
 
 Phase 2 focuses on the "NLP" part: intelligence features that go beyond static rendering
@@ -85,6 +85,6 @@ with a lighter in-house renderer.
 
 ## Integrations
 
-`nlp-mdsite` is the rendering end of the [`mdpub`](https://github.com/kotulc/nlp-mdpub)
+`mdsite` is the rendering end of the [`mdpub`](https://github.com/kotulc/nlp-mdpub)
 pipeline. Phase 2 intelligence features are co-developed: `mdpub` generates the signals
 (embeddings, style tags, theme hints) and this template consumes and renders them.

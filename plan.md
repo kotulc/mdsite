@@ -1,4 +1,4 @@
-# nlp-mdsite — Implementation Plan
+# mdsite — Implementation Plan
 
 Goal: go from a blank repo to a fully functional static site that renders the `examples/frww`
 content with preview and publish capabilities. Intelligence features (search, theming, logo)

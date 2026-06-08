@@ -18,7 +18,7 @@ related:
 
 # Features
 
-nlp-mdsite is a thin, opinionated layer on top of Next.js and Nextra. Each feature
+mdsite is a thin, opinionated layer on top of Next.js and Nextra. Each feature
 is either automatic (no configuration needed) or driven by a single frontmatter field.
 
 - [Content Pipeline](content-pipeline) — how markdown becomes a static site

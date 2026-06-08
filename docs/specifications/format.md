@@ -6,7 +6,7 @@ categories:
 
 # Feature Specification
 
-Feature specifications for nlp-mdsite. Each spec defines the purpose, requirements,
+Feature specifications for mdsite. Each spec defines the purpose, requirements,
 and named test cases for a feature area.
 
 ## Development Process

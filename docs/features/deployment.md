@@ -16,7 +16,7 @@ related:
 
 # Deployment
 
-nlp-mdsite deploys to GitHub Pages automatically via a single GitHub Actions workflow.
+mdsite deploys to GitHub Pages automatically via a single GitHub Actions workflow.
 
 ## Workflow overview
 
@@ -35,7 +35,7 @@ Set these as **repository variables** under Settings â†’ Secrets and variables â
 | Variable | Example | Notes |
 |----------|---------|-------|
 | `CONTENT_SOURCE` | `docs` | Path to content relative to repo root (default: `docs`) |
-| `BASE_PATH` | `/nlp-mdsite` | Required for project Pages repos; empty for root domains |
+| `BASE_PATH` | `/mdsite` | Required for project Pages repos; empty for root domains |
 
 ## Enabling GitHub Pages
 

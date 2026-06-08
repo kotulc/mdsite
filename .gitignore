@@ -10,3 +10,6 @@ public/posts-index.json
 dist/
 .next/
 node_modules/
+
+SPEC.md
+plan.md

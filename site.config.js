@@ -1,9 +1,9 @@
 /** Site-level configuration. Populate before running mdpub build or next dev. */
 module.exports = {
-  title: 'nlp-mdsite',
+  title: 'mdsite',
   base_url: 'https://kotulc.github.io',
-  base_path: '/nlp-mdsite',
-  repo_url: 'https://github.com/kotulc/nlp-mdsite',  // GitHub icon shown in header; leave empty to hide
+  base_path: '/mdsite',
+  repo_url: 'https://github.com/kotulc/mdsite',  // GitHub icon shown in header; leave empty to hide
   feed_url: 'updates',     // RSS icon shown in header linking to this path; leave empty to hide
   theme_toggle: 'navbar',  // where the light/dark/system toggle appears: 'navbar' or 'sidebar'
   ingest_readme: false,    // copy README.md → docs/about.md during ingest
