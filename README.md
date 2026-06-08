@@ -184,6 +184,77 @@ https://<username>.github.io/<repo-name>/
 GitHub Pages can take 1–2 minutes to propagate after the first deploy.
 
 
+## Using as a Reusable Workflow
+
+Any GitHub repository can publish its docs folder to GitHub Pages using mdsite as the build
+engine — no cloning or forking required. The deploy workflow supports `workflow_call` so other
+repos can call it directly.
+
+### Setup in the calling repo
+
+**1. Create a site config**
+
+Add `site.config.js` to the root of your repo. The workflow will copy it over mdsite's defaults
+before building:
+
+```js
+module.exports = {
+  title: 'My Project',
+  base_url: 'https://username.github.io',
+  base_path: '/repo-name',
+  repo_url: 'https://github.com/username/repo-name',
+}
+```
+
+**2. Add the caller workflow**
+
+Create `.github/workflows/publish-docs.yml`:
+
+```yaml
+name: Publish Docs
+
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**', 'site.config.js']
+  workflow_dispatch:
+
+jobs:
+  publish:
+    uses: kotulc/mdsite/.github/workflows/deploy.yml@main
+    permissions:
+      contents: write
+    with:
+      content_repo: owner/repo-name
+      content_path: docs
+      base_path: /repo-name
+```
+
+Replace `owner/repo-name` with your GitHub repository slug and `/repo-name` with the
+subpath where your GitHub Pages site lives.
+
+**3. Enable GitHub Pages** *(one-time setup)*
+
+In your repo on GitHub:
+- **Settings → Pages → Build and deployment**
+- Set **Source** to `Deploy from a branch`
+- Set **Branch** to `gh-pages`, folder `/ (root)`
+
+The `gh-pages` branch is created automatically on first run. Push to `main` (or trigger
+manually via **Actions → Publish Docs → Run workflow**) to deploy.
+
+### How it works
+
+The reusable workflow:
+1. Checks out `kotulc/mdsite` for the build tooling
+2. Checks out your repo into `_content/`
+3. Copies your `site.config.js` if present
+4. Ingests your docs, builds, and deploys to your repo's `gh-pages` branch
+
+`GITHUB_TOKEN` in a called workflow resolves to the **calling repo's** token, so the deploy
+always targets your repo's GitHub Pages — not mdsite's.
+
+
 ## Integrations
 
 `nlp-mdsite` is the rendering and build step at the end of the [`mdpub`](https://github.com/kotulc/nlp-mdpub)
