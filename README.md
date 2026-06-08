@@ -152,11 +152,14 @@ git commit -m "Add docs content and configure deployment"
 git push
 ```
 
-**2. Enable GitHub Pages** *(one-time setup)*
+This first push creates the `gh-pages` branch automatically.
+
+**2. Enable GitHub Pages** *(one-time setup — do this after the first push)*
 
 Go to your repository on GitHub:
 - **Settings → Pages → Build and deployment**
-- Set **Source** to `GitHub Actions`
+- Set **Source** to `Deploy from a branch`
+- Set **Branch** to `gh-pages`, folder `/ (root)`
 - Click **Save**
 
 **3. Set the BASE_PATH variable** *(project pages repos only)*
@@ -220,8 +223,7 @@ jobs:
   publish:
     uses: kotulc/mdsite/.github/workflows/deploy.yml@main
     permissions:
-      pages: write
-      id-token: write
+      contents: write
     with:
       content_repo: owner/repo-name
       content_path: docs
@@ -231,13 +233,19 @@ jobs:
 Replace `owner/repo-name` with your GitHub repository slug and `/repo-name` with the
 subpath where your GitHub Pages site lives.
 
-**3. Enable GitHub Pages** *(one-time setup)*
+**3. Trigger the first deploy**
+
+Push to `main` (or trigger manually via **Actions → Publish Docs → Run workflow**). This
+creates the `gh-pages` branch in your repo.
+
+**4. Enable GitHub Pages** *(one-time setup — do this after the first push)*
 
 In your repo on GitHub:
 - **Settings → Pages → Build and deployment**
-- Set **Source** to `GitHub Actions`
+- Set **Source** to `Deploy from a branch`
+- Set **Branch** to `gh-pages`, folder `/ (root)`
 
-Then push to `main` (or trigger manually via **Actions → Publish Docs → Run workflow**).
+All subsequent pushes to `docs/` or `site.config.js` deploy automatically from here.
 
 ### How it works
 
@@ -245,10 +253,10 @@ The reusable workflow:
 1. Checks out `kotulc/mdsite` for the build tooling
 2. Checks out your repo into `_content/`
 3. Copies your `site.config.js` if present
-4. Ingests your docs, builds, and deploys to your repo's GitHub Pages
+4. Ingests your docs, builds, and pushes to your repo's `gh-pages` branch
 
 `GITHUB_TOKEN` in a called workflow resolves to the **calling repo's** token, so the deploy
-always targets your repo's GitHub Pages — not mdsite's.
+always targets your repo's `gh-pages` — not mdsite's.
 
 
 ## Integrations
