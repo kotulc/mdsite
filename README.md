@@ -156,11 +156,8 @@ git push
 
 Go to your repository on GitHub:
 - **Settings → Pages → Build and deployment**
-- Set **Source** to `Deploy from a branch`
-- Set **Branch** to `gh-pages`, folder `/ (root)`
+- Set **Source** to `GitHub Actions`
 - Click **Save**
-
-The `gh-pages` branch is created automatically by the workflow on first run.
 
 **3. Set the BASE_PATH variable** *(project pages repos only)*
 
@@ -223,7 +220,8 @@ jobs:
   publish:
     uses: kotulc/mdsite/.github/workflows/deploy.yml@main
     permissions:
-      contents: write
+      pages: write
+      id-token: write
     with:
       content_repo: owner/repo-name
       content_path: docs
@@ -237,11 +235,9 @@ subpath where your GitHub Pages site lives.
 
 In your repo on GitHub:
 - **Settings → Pages → Build and deployment**
-- Set **Source** to `Deploy from a branch`
-- Set **Branch** to `gh-pages`, folder `/ (root)`
+- Set **Source** to `GitHub Actions`
 
-The `gh-pages` branch is created automatically on first run. Push to `main` (or trigger
-manually via **Actions → Publish Docs → Run workflow**) to deploy.
+Then push to `main` (or trigger manually via **Actions → Publish Docs → Run workflow**).
 
 ### How it works
 
@@ -249,7 +245,7 @@ The reusable workflow:
 1. Checks out `kotulc/mdsite` for the build tooling
 2. Checks out your repo into `_content/`
 3. Copies your `site.config.js` if present
-4. Ingests your docs, builds, and deploys to your repo's `gh-pages` branch
+4. Ingests your docs, builds, and deploys to your repo's GitHub Pages
 
 `GITHUB_TOKEN` in a called workflow resolves to the **calling repo's** token, so the deploy
 always targets your repo's GitHub Pages — not mdsite's.
