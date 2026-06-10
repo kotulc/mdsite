@@ -63,7 +63,7 @@ The fastest path is to edit `site.config.js` directly and use the npm scripts:
 npm run ingest docs        # ingest from docs/ (default)
 npm run dev                # development server with hot reload
 npm run build              # production build → dist/
-npm run preview            # serve the built dist/
+npm run preview            # serve dist/ locally (handles base_path rewriting)
 npm test                   # run all tests
 ```
 
