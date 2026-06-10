@@ -1,7 +1,7 @@
 const fs   = require('fs')
 const path = require('path')
 
-const OUT = path.join(__dirname, '../../out')
+const OUT = path.join(__dirname, '../../dist')
 
 
 test('test_build_out_dir_exists', () => {

@@ -1,0 +1,21 @@
+title: mdsite
+base_url: https://kotulc.github.io
+base_path: /mdsite
+repo_url: https://github.com/kotulc/mdsite
+feed_url: updates
+theme_toggle: navbar
+toc: true
+meta_sidebar: true
+ingest_readme: false
+
+content: ./docs
+output: ./dist
+
+flatten:
+  - updates
+
+nav_order:
+  "": [about, getting-started, configuration]
+  features: [overview]
+  specs: [format]
+  updates: [welcome]

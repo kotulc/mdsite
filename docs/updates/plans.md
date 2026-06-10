@@ -22,7 +22,7 @@ related:
 Phase 1 of `mdsite` is complete. The core pipeline — markdown ingestion, metadata
 display, navigation, theming, and GitHub Pages deployment — is fully functional.
 
-Phase 2 focuses on the "NLP" part: intelligence features that go beyond static rendering
+Phase 2 focuses on intelligence features that go beyond static rendering
 and begin to surface meaning from content.
 
 
@@ -32,7 +32,7 @@ and begin to surface meaning from content.
 - Image copying, path rewriting, and EXIF repair
 - Reading time estimation, injected automatically into every page
 - Tag and category chips; numeric frontmatter metrics in a sticky sidebar
-- Nav ordering via `site.config.js` and per-page frontmatter `order:`
+- Nav ordering via `mdsite.yaml` and per-page frontmatter `order:`
 - Per-page continuation feed (scroll to load the next page inline)
 - Light / dark / system theme toggle in the navbar
 - GitHub repo icon in the navbar, driven by `repo_url` in config
@@ -48,30 +48,30 @@ A client-side search component that queries across all content by meaning, not j
 keyword matching. The plan is to pre-compute a lightweight embedding index at build time
 and serve it as a static JSON asset, keeping the site fully static with no server required.
 
-Config hook (reserved): none yet — will be a new `search:` field in `site.config.js`.
+Config hook (reserved): none yet — will be a new `search:` field in `mdsite.yaml`.
 
 ### Semantic theming
 
 Derives a color palette and visual identity from content signals rather than manual
 configuration. The upstream pipeline (`mdpub`) analyzes the content and writes
-`content_style` and `theme_mood` into `site.config.js`; the template reads these to
+`content_style` and `theme_mood` into `mdsite.yaml`; the engine reads these to
 select an appropriate Nextra `primaryHue` and accent palette.
 
-Config hooks (reserved in `site.config.js`):
-```js
-content_style: '',  // e.g. 'technical', 'narrative', 'minimal'
-theme_mood: '',     // e.g. 'calm', 'bold', 'professional'
+Config hooks (reserved in `mdsite.yaml`):
+```yaml
+content_style: ""  # e.g. "technical", "narrative", "minimal"
+theme_mood: ""     # e.g. "calm", "bold", "professional"
 ```
 
 ### Logo generation
 
 A seeded SVG logo composed from a curated icon set and background shapes. Incrementing
-`logo_seed` in `site.config.js` regenerates the logo without any manual design work.
+`logo_seed` in `mdsite.yaml` regenerates the logo without any manual design work.
 Intended for agent-driven site creation where no human designer is in the loop.
 
-Config hook (reserved in `site.config.js`):
-```js
-logo_seed: 1,  // increment to regenerate
+Config hook (reserved in `mdsite.yaml`):
+```yaml
+logo_seed: 1  # increment to regenerate
 ```
 
 ### Reduced external dependencies

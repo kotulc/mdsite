@@ -21,7 +21,6 @@ related:
 
 - Node.js 18 or later
 - npm (bundled with Node.js)
-- A GitHub repository with Pages enabled
 
 ## Setup
 
@@ -33,24 +32,27 @@ npm install
 
 **2. Configure the site**
 
-Edit `site.config.js`:
+Create an `mdsite.yaml` in your project root (or copy the included one):
 
-```js
-module.exports = {
-  title: 'My Site',
-  base_url: 'https://username.github.io',
-  base_path: '/repo-name',
-}
+```yaml
+title: My Site
+base_url: https://username.github.io
+base_path: /repo-name
+repo_url: https://github.com/username/repo-name
+content: ./docs
+output: ./dist
 ```
+
+See [Configuration](/configuration) for the full field reference.
 
 **3. Organize your content**
 
 Place markdown files in any directory. Subdirectories become URL segments.
-A `home.md` or `index.md` at any level becomes that section's landing page.
+An `index.md` at any level becomes that section's landing page.
 
 ```
-source/
-├── home.md
+docs/
+├── index.md
 ├── about.md
 ├── images/
 └── posts/
@@ -58,18 +60,29 @@ source/
         └── my-first-post.md
 ```
 
-**4. Run setup**
+**4. Build the site**
 
 ```bash
-npm run setup -- --source path/to/source
+node scripts/cli.js build --config mdsite.yaml
 ```
 
-This ingests content, rewrites image paths, and generates navigation files.
+This ingests content, rewrites image paths, generates navigation files,
+and produces a fully-built static site in `dist/`.
 
 **5. Preview locally**
 
 ```bash
-npm run dev
+npm run preview    # serve dist/ locally
+npm run dev        # development server with hot reload
+```
+
+## Local development workflow
+
+For iterating on content without a full build each time:
+
+```bash
+npm run ingest docs    # ingest from docs/ (default)
+npm run dev            # hot-reload dev server
 ```
 
 ## Frontmatter fields

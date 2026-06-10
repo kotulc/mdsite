@@ -10,7 +10,7 @@
   <line x1="130" y1="60" x2="162" y2="60" stroke="#888" stroke-width="1.5" marker-end="url(#arr)"/>
   <line x1="285" y1="60" x2="317" y2="60" stroke="#888" stroke-width="1.5" marker-end="url(#arr)"/>
   <line x1="440" y1="60" x2="472" y2="60" stroke="#888" stroke-width="1.5" marker-end="url(#arr)"/>
-  <line x1="595" y1="60" x2="587" y2="60" stroke="#888" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="595" y1="60" x2="607" y2="60" stroke="#888" stroke-width="1.5" marker-end="url(#arr)"/>
 
   <defs>
     <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
@@ -26,7 +26,7 @@
   <text x="380" y="55" text-anchor="middle" font-size="13" font-weight="600" fill="#1a1a2e">MDX Pages</text>
   <text x="380" y="72" text-anchor="middle" font-size="11" fill="#555">pages/ directory</text>
   <text x="535" y="55" text-anchor="middle" font-size="13" font-weight="600" fill="#1a1a2e">Build</text>
-  <text x="535" y="72" text-anchor="middle" font-size="11" fill="#555">next build → out/</text>
+  <text x="535" y="72" text-anchor="middle" font-size="11" fill="#555">next build → dist/</text>
   <text x="650" y="55" text-anchor="middle" font-size="13" font-weight="600" fill="#155724">Deploy</text>
   <text x="650" y="72" text-anchor="middle" font-size="11" fill="#155724">GitHub Pages</text>
 </svg>

@@ -14,19 +14,22 @@
  *
  * Usage: node scripts/ingest.js [source-dir]
  *        Default source-dir: docs/
- * Exports: parse_fm, sort_entries, extract_content, auto_index (for testing)
+ * Exports: parse_fm, sort_entries, extract_content, auto_index, norm_path, run
  */
 const fs = require('fs')
 const path = require('path')
 const { strip_dir } = require('./fix-exif')
-const siteConfig = require('../site.config')
 
 
 const ROOT    = path.join(__dirname, '..')
-const SRC     = path.resolve(process.argv[2] || path.join(ROOT, 'docs'))
 const PAGES   = path.join(ROOT, 'pages')
 const PUB_IMG = path.join(ROOT, 'public', 'images')
 const PUB_DIR = path.join(ROOT, 'public')
+
+
+// Module-level config: set by run(config), falls back to site.config.js for local dev
+let _config = null
+function get_config() { return _config || require('../site.config') }
 
 
 function parse_fm(content) {
@@ -123,8 +126,8 @@ function norm_path(p) {
 
 
 function is_flatten(rel) {
-  /** True if rel matches a directory in siteConfig.flatten (paths normalized). */
-  return (siteConfig.flatten || []).map(norm_path).includes(rel)
+  /** True if rel matches a directory in config.flatten (paths normalized). */
+  return (get_config().flatten || []).map(norm_path).includes(rel)
 }
 
 
@@ -158,7 +161,7 @@ function sort_entries(entries, rel) {
   const idx  = entries.filter(e => e.slug === 'index')
   const rest = entries.filter(e => e.slug !== 'index')
   const nav_map = Object.fromEntries(
-    Object.entries(siteConfig.nav_order || {}).map(([k, v]) => [norm_path(k), v])
+    Object.entries(get_config().nav_order || {}).map(([k, v]) => [norm_path(k), v])
   )
   const nav  = nav_map[rel]
 
@@ -315,7 +318,6 @@ function ingest_dir(src_dir, dest_dir, rel) {
 }
 
 
-
 function ensure_h1(mdx_path, title) {
   /** Prepend # title heading if body has no h1. */
   const content = fs.readFileSync(mdx_path, 'utf8')
@@ -342,34 +344,47 @@ function extract_content(mdx) {
 }
 
 
-function sync_readme() {
-  /** Copy README.md → docs/about.md so ingest_dir() processes it normally. */
+function sync_readme(src) {
+  /** Copy README.md → <src>/about.md so ingest_dir() processes it normally. */
   const readme_path = path.join(ROOT, 'README.md')
   if (!fs.existsSync(readme_path)) return
-  fs.copyFileSync(readme_path, path.join(SRC, 'about.md'))
+  fs.copyFileSync(readme_path, path.join(src, 'about.md'))
 }
 
 
-// --- Exports (for testing) ---
+function run(config) {
+  /** Execute the full ingest pipeline with the given config object. */
+  _config = config
+  const src = config.content
 
-module.exports = { parse_fm, sort_entries, extract_content, auto_index, norm_path }
-
-
-// --- Main ---
-
-if (require.main === module) {
-  console.log(`\nIngesting from: ${SRC}`)
+  console.log(`\nIngesting from: ${src}`)
 
   fs.rmSync(PAGES,   { recursive: true, force: true })
   fs.rmSync(PUB_IMG, { recursive: true, force: true })
 
-  if (siteConfig.ingest_readme) sync_readme()
+  if (config.ingest_readme) sync_readme(src)
 
-  ingest_dir(SRC, PAGES, '')
+  ingest_dir(src, PAGES, '')
 
   const app_src = path.join(ROOT, '_app.jsx')
   if (fs.existsSync(app_src)) fs.copyFileSync(app_src, path.join(PAGES, '_app.jsx'))
 
   console.log(`  Mirrored source tree into pages/`)
   console.log('Done.\n')
+
+  _config = null
+}
+
+
+// --- Exports ---
+
+module.exports = { parse_fm, sort_entries, extract_content, auto_index, norm_path, run }
+
+
+// --- Main (direct invocation: npm run ingest [source-dir]) ---
+
+if (require.main === module) {
+  const src = path.resolve(process.argv[2] || path.join(ROOT, 'docs'))
+  const cfg = { ...require('../site.config'), content: src }
+  run(cfg)
 }

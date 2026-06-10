@@ -39,16 +39,6 @@ function check_npm_installed() {
 }
 
 
-function check_site_config() {
-  /** Warn about site.config.js fields that still hold default placeholder values. */
-  let cfg
-  try { cfg = require(path.join(ROOT, 'site.config.js')) }
-  catch { console.warn('  Warning: site.config.js not found — using defaults.'); return }
-
-  if (!cfg.title || cfg.title === 'My Site') console.warn('  Warning: site.config.js: title is not set.')
-  if (!cfg.base_url)  console.warn('  Warning: site.config.js: base_url is empty.')
-}
-
 
 function run_ingest(source) {
   /** Run scripts/ingest.js with the resolved source directory. */
@@ -77,7 +67,6 @@ const { source, build } = parse_args()
 console.log('\nRunning setup...')
 check_node()
 check_npm_installed()
-check_site_config()
 run_ingest(source)
 if (build) run_build()
 console.log('Setup complete.\n')

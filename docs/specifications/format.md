@@ -45,4 +45,4 @@ One-paragraph description of purpose.
 - [Page Metadata](page-metadata) — date, reading time, category and tag chips
 - [Metadata Sidebar](meta-sidebar) — per-page metrics, tags, and related links in the TOC column
 - [Post Index](post-index) — reverse-chronological dated post listing
-- [Site Configuration](site-configuration) — all `site.config.js` fields and their effects
+- [Site Configuration](site-configuration) — all `mdsite.yaml` fields and their effects

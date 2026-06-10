@@ -9,9 +9,10 @@ scrolling inline feed instead of individual navigable pages.
 
 ## Config
 
-```js
-// site.config.js
-flatten: ['updates'],  // dir paths to render as inline feeds; '/' = site root
+```yaml
+# mdsite.yaml
+flatten:
+  - updates  # dir paths to render as inline feeds; '/' = site root
 ```
 
 `'/'` maps to `rel = ''` (the source root) internally.
