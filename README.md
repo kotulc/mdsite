@@ -63,7 +63,7 @@ The fastest path is to edit `site.config.js` directly and use the npm scripts:
 npm run ingest docs        # ingest from docs/ (default)
 npm run dev                # development server with hot reload
 npm run build              # production build → dist/
-npm run preview            # serve dist/ locally (handles base_path rewriting)
+npm run preview            # serve dist/ locally
 npm test                   # run all tests
 ```
 
@@ -92,10 +92,8 @@ Full schema with defaults:
 ```yaml
 # Required
 title: My Site
-base_url: https://username.github.io
 
 # Optional — site identity
-base_path: /repo-name        # subpath for project pages; empty for root domains
 repo_url: ""                 # shows a GitHub icon in the navbar when set
 feed_url: ""                 # slug of the section used as the per-page feed
 
@@ -109,7 +107,7 @@ ingest_readme: false         # sync README.md → about page
 flatten: []                  # list of section slugs to flatten (no subfolder in nav)
 nav_order: {}                # map of section slug → ordered list of page slugs
 
-# Optional — theming
+# Optional — theming (Phase 2)
 content_style: ""
 theme_mood: ""
 logo_seed: 1
@@ -118,6 +116,21 @@ logo_seed: 1
 content: ./docs              # source markdown directory
 output: ./dist               # output directory for built site
 ```
+
+### BASE_PATH environment variable
+
+If your site is served from a subpath (e.g. `https://username.github.io/repo-name`),
+set the `BASE_PATH` environment variable at build time — do not add it to `mdsite.yaml`.
+
+```bash
+BASE_PATH=/repo-name node scripts/cli.js build --config mdsite.yaml
+# or via Docker:
+docker run --rm -e BASE_PATH=/repo-name -v $(pwd):/workspace ghcr.io/kotulc/mdsite build --config /workspace/mdsite.yaml
+```
+
+For GitHub Pages the deploy workflow reads `BASE_PATH` from a repository Actions variable
+(Settings → Secrets and variables → Actions → Variables). Local builds and previews need
+no base path — `npx serve dist` works as-is.
 
 
 ## Docker

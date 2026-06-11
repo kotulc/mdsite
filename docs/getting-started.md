@@ -36,12 +36,13 @@ Create an `mdsite.yaml` in your project root (or copy the included one):
 
 ```yaml
 title: My Site
-base_url: https://username.github.io
-base_path: /repo-name
 repo_url: https://github.com/username/repo-name
 content: ./docs
 output: ./dist
 ```
+
+If deploying to a subpath (e.g. GitHub Pages project repo), set `BASE_PATH=/repo-name`
+as an environment variable at build time — see [Configuration](/configuration).
 
 See [Configuration](/configuration) for the full field reference.
 

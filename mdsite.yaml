@@ -1,6 +1,4 @@
 title: mdsite
-base_url: https://kotulc.github.io
-base_path: /mdsite
 repo_url: https://github.com/kotulc/mdsite
 feed_url: updates
 theme_toggle: navbar
@@ -16,6 +14,6 @@ flatten:
 
 nav_order:
   "": [about, getting-started, configuration]
-  features: [overview]
+  features: [overview, components]
   specs: [format]
   updates: [welcome]

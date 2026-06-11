@@ -9,7 +9,6 @@ const yaml = require('js-yaml')
 
 
 const DEFAULTS = {
-  base_path:      '',
   repo_url:       '',
   feed_url:       '',
   theme_toggle:   'navbar',
@@ -33,8 +32,7 @@ function load_config(yaml_path) {
   const raw  = yaml.load(fs.readFileSync(abs, 'utf8'))
   const cfg  = { ...DEFAULTS, ...raw }
 
-  if (!cfg.title)    throw new Error(`mdsite.yaml: 'title' is required`)
-  if (!cfg.base_url) throw new Error(`mdsite.yaml: 'base_url' is required`)
+  if (!cfg.title) throw new Error(`mdsite.yaml: 'title' is required`)
 
   cfg.content = path.resolve(dir, cfg.content)
   cfg.output  = path.resolve(dir, cfg.output)
@@ -47,7 +45,7 @@ function write_site_config(config, dest_dir) {
   /** Generate site.config.js from a config object for Next.js/Nextra consumption. */
   const dir  = dest_dir || path.join(__dirname, '..')
   const keys = [
-    'title', 'base_url', 'base_path', 'repo_url', 'feed_url',
+    'title', 'repo_url', 'feed_url',
     'theme_toggle', 'ingest_readme', 'toc', 'meta_sidebar',
     'content_style', 'theme_mood', 'logo_seed', 'flatten', 'nav_order',
   ]

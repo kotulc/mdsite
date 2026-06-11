@@ -26,8 +26,6 @@ consumed by Next.js and Nextra.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `title` | string | *(required)* | Site name — shown in the logo, footer, and page titles |
-| `base_url` | string | *(required)* | Deployed domain, e.g. `https://user.github.io` |
-| `base_path` | string | `""` | Subpath for GitHub Pages repos, e.g. `/repo-name` |
 | `repo_url` | string | `""` | GitHub repo link shown as an icon in the header; leave empty to hide |
 | `feed_url` | string | `""` | Slug of the section used as the per-page continuation feed |
 | `theme_toggle` | string | `"navbar"` | Where the light/dark toggle appears: `"navbar"` or `"footer"` |
@@ -46,8 +44,6 @@ consumed by Next.js and Nextra.
 
 ```yaml
 title: My Site
-base_url: https://myuser.github.io
-base_path: /my-repo
 repo_url: https://github.com/myuser/my-repo
 feed_url: updates
 content: ./docs
@@ -72,18 +68,30 @@ the explicit entries.
 For individual pages without a full directory listing, add `order: N` to the
 page's frontmatter instead — lower numbers appear first.
 
+## BASE_PATH environment variable
+
+If your site is served from a subpath (e.g. `username.github.io/repo-name`), pass
+`BASE_PATH` as an environment variable at build time — do not put it in `mdsite.yaml`:
+
+```bash
+BASE_PATH=/repo-name node scripts/cli.js build --config mdsite.yaml
+# or via Docker:
+docker run --rm -e BASE_PATH=/repo-name -v $(pwd):/workspace ghcr.io/kotulc/mdsite ...
+```
+
+For GitHub Pages, the deploy workflow reads `BASE_PATH` from a repository Actions variable
+(Settings → Secrets and variables → Actions → Variables → `BASE_PATH`).
+Local builds and previews need no base path — `npx serve dist` works as-is.
+
 ## GitHub Actions variables
 
-The deployment workflow reads two optional repository variables.
+The deployment workflow reads these optional repository variables.
 Set them under **Settings → Secrets and variables → Actions → Variables**.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `CONTENT_SOURCE` | `docs` | Path to content directory, relative to repo root |
-| `BASE_PATH` | _(empty)_ | GitHub Pages base path, passed to Next.js at build time |
-
-`BASE_PATH` is required whenever your site lives at a subpath (e.g. `username.github.io/repo-name`).
-Leave it empty for root domain deployments.
+| `BASE_PATH` | _(empty)_ | Subpath prefix for project pages repos (e.g. `/mdsite`) |
 
 ## CLI overrides
 
