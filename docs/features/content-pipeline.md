@@ -22,9 +22,9 @@ the Next.js `pages/` directory. Run it directly:
 
     npm run ingest -- path/to/source
 
-Or use the setup command, which also validates your environment:
+Or use the CLI for a config-driven build:
 
-    npm run setup -- --source path/to/source
+    node scripts/cli.js build --config mdsite.yaml
 
 
 ## What the pipeline does
@@ -53,10 +53,10 @@ Or use the setup command, which also validates your environment:
 
 7. **Generates `_meta.json`** — navigation ordering at every directory level.
    Sort order:
-   - `nav_order` array in `site.config.js` pins listed pages first in declared order
+   - `nav_order` array in `mdsite.yaml` pins listed pages first in declared order
    - Remaining pages: newest-first if any have a `date` field, alphabetical otherwise
 
-8. **Flattens directories** — directories listed in `site.config.js` `flatten` field
+8. **Flattens directories** — directories listed in `mdsite.yaml` `flatten` field
    are rendered as a single scrolling inline feed instead of individual navigable pages.
    A `public/dir-feeds/<name>.json` file is written with each page's full content,
    and the directory's `index.mdx` uses the `DirFeed` component to render them inline.
