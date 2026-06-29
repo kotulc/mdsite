@@ -220,7 +220,7 @@ function ingest_dir(src_dir, dest_dir, rel) {
 
   const entries = []
   const base = path.basename(src_dir)
-  let dir_title = base.charAt(0).toUpperCase() + base.slice(1)
+  let dir_title = slug_to_title(base)
 
   for (const entry of fs.readdirSync(src_dir).sort()) {
     const src_entry = path.join(src_dir, entry)
@@ -257,7 +257,7 @@ function ingest_dir(src_dir, dest_dir, rel) {
 
     const record = {
       slug,
-      title:        fm.title        || slug,
+      title:        fm.title        || slug_to_title(base),
       date:         fm.date         || '',
       categories:   Array.isArray(fm.categories) ? fm.categories : [],
       tags:         Array.isArray(fm.tags)        ? fm.tags        : [],
@@ -344,11 +344,9 @@ function extract_content(mdx) {
 }
 
 
-function sync_readme(src) {
-  /** Copy README.md → <src>/about.md so ingest_dir() processes it normally. */
-  const readme_path = path.join(ROOT, 'README.md')
-  if (!fs.existsSync(readme_path)) return
-  fs.copyFileSync(readme_path, path.join(src, 'about.md'))
+function slug_to_title(s) {
+  /** Convert a slug (kebab or snake case) to a capitalized title. */
+  return s.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
 
 
@@ -361,8 +359,6 @@ function run(config) {
 
   fs.rmSync(PAGES,   { recursive: true, force: true })
   fs.rmSync(PUB_IMG, { recursive: true, force: true })
-
-  if (config.ingest_readme) sync_readme(src)
 
   ingest_dir(src, PAGES, '')
 
@@ -378,7 +374,7 @@ function run(config) {
 
 // --- Exports ---
 
-module.exports = { parse_fm, sort_entries, extract_content, auto_index, norm_path, run }
+module.exports = { parse_fm, sort_entries, extract_content, auto_index, norm_path, slug_to_title, run }
 
 
 // --- Main (direct invocation: npm run ingest [source-dir]) ---

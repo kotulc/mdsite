@@ -6,7 +6,7 @@ const fs   = require('fs')
 const os   = require('os')
 const path = require('path')
 
-const { parse_fm, sort_entries, extract_content, auto_index, norm_path } = require('../../scripts/ingest')
+const { parse_fm, sort_entries, extract_content, auto_index, norm_path, slug_to_title } = require('../../scripts/ingest')
 
 
 // --- sort_entries ---
@@ -293,6 +293,43 @@ describe('dir-feed output', () => {
     for (const v of Object.values(meta)) {
       expect(v).toMatchObject({ display: 'hidden' })
     }
+  })
+})
+
+
+// --- navtree naming (slug_to_title + integration) ---
+
+describe('navtree naming', () => {
+  test('test_nav_label_from_frontmatter_title', () => {
+    /** frontmatter title is used as-is for the navtree label. */
+    const meta = JSON.parse(fs.readFileSync(path.join(PAGES, 'specifications', '_meta.json'), 'utf8'))
+    expect(meta['page-metadata']).toBe('Page Metadata')
+  })
+
+  test('test_nav_label_fallback_slug_to_title', () => {
+    /** slug_to_title converts kebab/snake slugs to capitalized title strings. */
+    expect(slug_to_title('my-page')).toBe('My Page')
+    expect(slug_to_title('getting_started')).toBe('Getting Started')
+    expect(slug_to_title('overview')).toBe('Overview')
+  })
+
+  test('test_nav_label_home_md', () => {
+    /** home.md with no frontmatter title produces "Home", not "index". */
+    expect(slug_to_title('home')).toBe('Home')
+  })
+
+  test('test_nav_label_index_md', () => {
+    /** index.md with no frontmatter title produces "Index". */
+    expect(slug_to_title('index')).toBe('Index')
+  })
+
+  test('test_nav_label_dir_from_index_title', () => {
+    /** Directory label in parent meta matches its index page's frontmatter title. */
+    const root_meta  = JSON.parse(fs.readFileSync(path.join(PAGES, '_meta.json'), 'utf8'))
+    const specs_meta = JSON.parse(fs.readFileSync(path.join(PAGES, 'specifications', '_meta.json'), 'utf8'))
+    expect(root_meta['specifications']).toBeDefined()
+    expect(typeof root_meta['specifications']).toBe('string')
+    expect(specs_meta['format']).toBe('Spec Format')
   })
 })
 

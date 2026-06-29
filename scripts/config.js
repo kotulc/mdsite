@@ -14,7 +14,6 @@ const DEFAULTS = {
   theme_toggle:   'navbar',
   toc:            true,
   meta_sidebar:   true,
-  ingest_readme:  false,
   content_style:  '',
   theme_mood:     '',
   logo_seed:      1,
@@ -46,7 +45,7 @@ function write_site_config(config, dest_dir) {
   const dir  = dest_dir || path.join(__dirname, '..')
   const keys = [
     'title', 'repo_url', 'feed_url',
-    'theme_toggle', 'ingest_readme', 'toc', 'meta_sidebar',
+    'theme_toggle', 'toc', 'meta_sidebar',
     'content_style', 'theme_mood', 'logo_seed', 'flatten', 'nav_order',
   ]
   const body = keys

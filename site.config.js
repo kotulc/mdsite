@@ -4,7 +4,6 @@ module.exports = {
   repo_url: "https://github.com/kotulc/mdsite",
   feed_url: "updates",
   theme_toggle: "navbar",
-  ingest_readme: false,
   toc: true,
   meta_sidebar: true,
   content_style: "",
