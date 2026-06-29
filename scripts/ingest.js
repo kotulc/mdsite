@@ -374,7 +374,7 @@ function run(config) {
 
 // --- Exports ---
 
-module.exports = { parse_fm, sort_entries, extract_content, auto_index, norm_path, run }
+module.exports = { parse_fm, sort_entries, extract_content, auto_index, norm_path, slug_to_title, run }
 
 
 // --- Main (direct invocation: npm run ingest [source-dir]) ---
