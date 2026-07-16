@@ -21,6 +21,7 @@ const DEFAULTS = {
   nav_order:      {},
   content:        './docs',
   output:         './dist',
+  components:     '',
 }
 
 
@@ -35,6 +36,7 @@ function load_config(yaml_path) {
 
   cfg.content = path.resolve(dir, cfg.content)
   cfg.output  = path.resolve(dir, cfg.output)
+  if (cfg.components) cfg.components = path.resolve(dir, cfg.components)
 
   return cfg
 }

@@ -350,6 +350,24 @@ function slug_to_title(s) {
 }
 
 
+function sync_components(components_dir) {
+  /** Mirror consumer-supplied React components into components/custom/ so content
+   *  MDX can import them (e.g. `import X from '../components/custom/X'`). The
+   *  directory is regenerated each build; an empty/unset config leaves it empty. */
+  const dest = path.join(ROOT, 'components', 'custom')
+  fs.rmSync(dest, { recursive: true, force: true })
+  fs.mkdirSync(dest, { recursive: true })
+
+  if (!components_dir || !fs.existsSync(components_dir)) return []
+
+  const copied = fs.readdirSync(components_dir).filter(f => /\.(jsx?|tsx?)$/.test(f))
+  for (const file of copied) {
+    fs.copyFileSync(path.join(components_dir, file), path.join(dest, file))
+  }
+  return copied
+}
+
+
 function run(config) {
   /** Execute the full ingest pipeline with the given config object. */
   _config = config
@@ -365,6 +383,9 @@ function run(config) {
   const app_src = path.join(ROOT, '_app.jsx')
   if (fs.existsSync(app_src)) fs.copyFileSync(app_src, path.join(PAGES, '_app.jsx'))
 
+  const custom = sync_components(config.components)
+  if (custom.length) console.log(`  Synced ${custom.length} custom component(s) into components/custom/`)
+
   console.log(`  Mirrored source tree into pages/`)
   console.log('Done.\n')
 
@@ -374,7 +395,7 @@ function run(config) {
 
 // --- Exports ---
 
-module.exports = { parse_fm, sort_entries, extract_content, auto_index, norm_path, slug_to_title, run }
+module.exports = { parse_fm, sort_entries, extract_content, auto_index, norm_path, slug_to_title, sync_components, run }
 
 
 // --- Main (direct invocation: npm run ingest [source-dir]) ---

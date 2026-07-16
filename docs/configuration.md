@@ -39,6 +39,7 @@ consumed by Next.js and Nextra.
 | `logo_seed` | integer | `1` | Phase 2 — increment to regenerate the procedural logo |
 | `content` | path | `./docs` | Source markdown directory (resolved relative to this file) |
 | `output` | path | `./dist` | Output directory for the built site (resolved relative to this file) |
+| `components` | path | `""` | Optional directory of consumer React components, mirrored into `components/custom/` each build — content MDX can import them, e.g. `import Widget from '../components/custom/Widget'` |
 
 ## Example
 

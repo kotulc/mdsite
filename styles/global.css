@@ -359,6 +359,42 @@ img {
   font-style: italic;
 }
 
+/* Post entry summary line (below post-meta) */
+.post-summary {
+  margin: 0.25rem 0 0.5rem;
+  line-height: 1.6;
+  color: var(--nextra-colors-gray-600, #4b5563);
+}
+
+/* Interactive chips — chips rendered as <button> (e.g. filters, per-entry actions) */
+button.chip { border: none; cursor: pointer; font-family: inherit; }
+
+button.chip:hover { filter: brightness(0.95); }
+
+:is(html[class~="dark"]) button.chip:hover { filter: brightness(1.25); }
+
+/* Destructive-action chip variant */
+.chip-danger {
+  background: var(--nextra-colors-gray-100, #f3f4f6);
+  color: #b91c1c;
+}
+
+button.chip-danger:hover { background: #fee2e2; filter: none; }
+
+:is(html[class~="dark"]) .chip-danger { color: #f87171; }
+
+:is(html[class~="dark"]) button.chip-danger:hover {
+  background: rgba(248, 113, 113, 0.15);
+  filter: none;
+}
+
+/* Per-entry action row at the bottom of a post entry */
+.post-actions {
+  display: flex;
+  gap: 0.375rem;
+  margin-top: 0.625rem;
+}
+
 /* Hide breadcrumb on root-level pages — no parent path, so no chevron separator svg */
 .nextra-breadcrumb:not(:has(svg)) { display: none; }
 
