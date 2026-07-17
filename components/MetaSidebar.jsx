@@ -5,6 +5,7 @@
  */
 import { useConfig } from 'nextra-theme-docs'
 import Link from 'next/link'
+import Chip from './Chip'
 
 
 const RESERVED = new Set(['title', 'date', 'categories', 'tags', 'reading_time', 'related'])
@@ -26,12 +27,8 @@ export default function MetaSidebar() {
         <div className="meta-sidebar-section">
           <div className="meta-sidebar-label">Tags</div>
           <div className="meta-sidebar-chips">
-            {categories.map(c => (
-              <span key={c} className="chip chip-category">{c}</span>
-            ))}
-            {tags.map(t => (
-              <span key={t} className="chip chip-tag">{t}</span>
-            ))}
+            {categories.map(c => <Chip key={c} label={c} variant="category" />)}
+            {tags.map(t => <Chip key={t} label={t} variant="tag" />)}
           </div>
         </div>
       )}

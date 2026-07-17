@@ -26,7 +26,7 @@ export default function GitHubLink() {
       href={siteConfig.repo_url}
       target="_blank"
       rel="noopener noreferrer"
-      className="github-link"
+      className="icon-link"
       aria-label="GitHub repository"
     >
       {GH_MARK}

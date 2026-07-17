@@ -26,18 +26,18 @@ consumed by Next.js and Nextra.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `title` | string | *(required)* | Site name — shown in the logo, footer, and page titles |
+| `description` | string | `""` | SEO meta description added to every page's `<head>` |
 | `repo_url` | string | `""` | GitHub repo link shown as an icon in the header; leave empty to hide |
 | `feed_url` | string | `""` | Slug of the section used as the per-page continuation feed |
-| `theme_toggle` | string | `"navbar"` | Where the light/dark toggle appears: `"navbar"` or `"footer"` |
+| `footer` | string | `""` | Custom footer credits text; empty keeps "Powered by mdsite and Nextra" |
+| `theme_toggle` | string | `"navbar"` | Where the light/dark toggle appears: `"navbar"` or `"sidebar"` |
 | `toc` | boolean | `true` | Right sidebar: "On This Page" section navigation |
 | `meta_sidebar` | boolean | `true` | Right sidebar: tags, metrics, and related links below the TOC |
 | `reading_time` | boolean | `true` | Show estimated reading time in page headers and feeds |
-| `ingest_readme` | boolean | `false` | Sync `README.md` → `/about` page on each build |
+| `theme.color` | string | `"default"` | Named accent palette — see [Theme](#theme) below |
+| `theme.typeset` | string | `"sans"` | Named body font stack — see [Theme](#theme) below |
 | `flatten` | list | `[]` | Section slugs rendered as inline feeds rather than individual pages |
 | `nav_order` | object | `{}` | Explicit nav ordering per directory — see below |
-| `content_style` | string | `""` | Phase 2 — semantic style hint, e.g. `"technical"` |
-| `theme_mood` | string | `""` | Phase 2 — visual tone hint, e.g. `"calm"` |
-| `logo_seed` | integer | `1` | Phase 2 — increment to regenerate the procedural logo |
 | `content` | path | `./docs` | Source markdown directory (resolved relative to this file) |
 | `output` | path | `./dist` | Output directory for the built site (resolved relative to this file) |
 | `components` | path | `""` | Optional directory of consumer React components, mirrored into `components/custom/` each build — content MDX can import them, e.g. `import Widget from '../components/custom/Widget'` |
@@ -46,11 +46,43 @@ consumed by Next.js and Nextra.
 
 ```yaml
 title: My Site
+description: What my site is about
 repo_url: https://github.com/myuser/my-repo
 feed_url: updates
+theme:
+  color: emerald
+  typeset: serif
 content: ./docs
 output: ./dist
 ```
+
+## Theme
+
+The `theme` block styles the whole site from two named presets — no CSS required.
+
+**`theme.color`** sets the accent palette used for links, active nav items, chips, and
+buttons, in both light and dark mode. Available palettes:
+
+`default` · `slate` · `gray` · `blue` · `indigo` · `violet` · `rose` · `orange` ·
+`amber` · `emerald` · `teal` · `cyan`
+
+`default` is Nextra's stock blue. Palette hues follow the standard Tailwind colors.
+Warm palettes (`amber`, `orange`) have lower link contrast on white — they suit
+accent-light pages better than link-heavy ones.
+
+**`theme.typeset`** sets the body font from a curated system-font stack — zero network
+requests, no layout shift:
+
+| Typeset | Style |
+|---------|-------|
+| `sans` | System UI sans (Nextra default) |
+| `serif` | Charter / Sitka / Cambria / Georgia |
+| `humanist` | Seravek / Ubuntu / Calibri |
+| `geometric` | Avenir / Montserrat / Corbel |
+| `mono` | System monospace |
+
+Code blocks always render monospace regardless of typeset. Unknown `color` or
+`typeset` names fail the build with the list of valid values.
 
 ## Nav ordering
 

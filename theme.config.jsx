@@ -35,6 +35,8 @@ function PageTitle({ children }) {
 
 export default {
   logo: <span style={{ fontWeight: 600 }}>{siteConfig.title}</span>,
+  primaryHue: siteConfig.theme.hue,
+  primarySaturation: siteConfig.theme.saturation,
   darkMode: siteConfig.theme_toggle !== 'navbar',
   navbar: {
     extraContent: (
@@ -50,7 +52,13 @@ export default {
     return { titleTemplate: `%s – ${siteConfig.title}` }
   },
   head: (
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      {siteConfig.description && <meta name="description" content={siteConfig.description} />}
+      {siteConfig.theme.font_stack && (
+        <style dangerouslySetInnerHTML={{ __html: `body{font-family:${siteConfig.theme.font_stack}}` }} />
+      )}
+    </>
   ),
   toc: siteConfig.toc === false
     ? { component: () => null }

@@ -18,12 +18,16 @@ export default function SiteFooter() {
       <span>© {new Date().getFullYear()} {siteConfig.title}</span>
       {formatted && <><span className="site-footer-sep">·</span><span>Updated {formatted}</span></>}
       <span className="site-footer-sep">·</span>
-      <span>
-        Powered by{' '}
-        <a href="https://github.com/kotulc/mdsite" target="_blank" rel="noopener noreferrer">mdsite</a>
-        {' '}and{' '}
-        <a href="https://nextra.site" target="_blank" rel="noopener noreferrer">Nextra</a>
-      </span>
+      {siteConfig.footer ? (
+        <span>{siteConfig.footer}</span>
+      ) : (
+        <span>
+          Powered by{' '}
+          <a href="https://github.com/kotulc/mdsite" target="_blank" rel="noopener noreferrer">mdsite</a>
+          {' '}and{' '}
+          <a href="https://nextra.site" target="_blank" rel="noopener noreferrer">Nextra</a>
+        </span>
+      )}
     </div>
   )
 }

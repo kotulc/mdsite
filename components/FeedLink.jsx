@@ -18,7 +18,7 @@ export default function FeedLink() {
   if (!siteConfig.feed_url) return null
   const href = `/${siteConfig.feed_url.replace(/^\/+|\/+$/g, '')}`
   return (
-    <Link href={href} className="github-link" aria-label="Feed">
+    <Link href={href} className="icon-link" aria-label="Feed">
       {RSS_ICON}
     </Link>
   )

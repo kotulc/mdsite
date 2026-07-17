@@ -6,18 +6,19 @@
 const fs   = require('fs')
 const path = require('path')
 const yaml = require('js-yaml')
+const { resolve_theme } = require('./theme')
 
 
 const DEFAULTS = {
   repo_url:       '',
   feed_url:       '',
+  description:    '',
+  footer:         '',
   theme_toggle:   'navbar',
   toc:            true,
   meta_sidebar:   true,
   reading_time:   true,
-  content_style:  '',
-  theme_mood:     '',
-  logo_seed:      1,
+  theme:          { color: 'default', typeset: 'sans' },
   flatten:        [],
   nav_order:      {},
   content:        './docs',
@@ -35,6 +36,8 @@ function load_config(yaml_path) {
 
   if (!cfg.title) throw new Error(`mdsite.yaml: 'title' is required`)
 
+  cfg.theme = resolve_theme({ ...DEFAULTS.theme, ...(raw.theme || {}) })
+
   cfg.content = path.resolve(dir, cfg.content)
   cfg.output  = path.resolve(dir, cfg.output)
   if (cfg.components) cfg.components = path.resolve(dir, cfg.components)
@@ -47,9 +50,9 @@ function write_site_config(config, dest_dir) {
   /** Generate site.config.js from a config object for Next.js/Nextra consumption. */
   const dir  = dest_dir || path.join(__dirname, '..')
   const keys = [
-    'title', 'repo_url', 'feed_url',
+    'title', 'repo_url', 'feed_url', 'description', 'footer',
     'theme_toggle', 'toc', 'meta_sidebar', 'reading_time',
-    'content_style', 'theme_mood', 'logo_seed', 'flatten', 'nav_order',
+    'theme', 'flatten', 'nav_order',
   ]
   const body = keys
     .map(k => `  ${k}: ${JSON.stringify(config[k])}`)

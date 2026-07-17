@@ -34,42 +34,37 @@ project would create conflicts.
 copies it into `pages/` automatically, so edits to `_app.jsx` are preserved
 across ingest runs. Do not edit `pages/_app.jsx` directly.
 
-## Nextra's CSS variables
+## Site CSS variables
 
-Nextra exposes a set of CSS custom properties you can reference in your styles
-to stay in sync with the active light/dark theme:
+`styles/global.css` defines a set of `--site-*` design tokens at the top of the
+file. They adapt to light/dark mode automatically, and the primary shades derive
+from the `theme.color` palette configured in `mdsite.yaml`:
 
 ```css
 /* Gray scale */
---nextra-colors-gray-100   /* very light background tint */
---nextra-colors-gray-200   /* borders and dividers */
---nextra-colors-gray-400   /* disabled / placeholder */
---nextra-colors-gray-500   /* secondary text */
---nextra-colors-gray-600   /* body text */
---nextra-colors-gray-900   /* headings */
+--site-gray-100   /* very light background tint */
+--site-gray-200   /* borders and dividers */
+--site-gray-400   /* disabled / placeholder */
+--site-gray-500   /* secondary text */
+--site-gray-600   /* body text */
+--site-gray-900   /* headings */
 
-/* Primary accent (blue by default) */
---nextra-colors-primary-100  /* light accent background */
---nextra-colors-primary-600  /* link color */
---nextra-colors-primary-700  /* link hover */
-
-/* Layout */
---nextra-navbar-height: 4rem
+/* Primary accent — follows theme.color */
+--site-primary-100  /* light accent background */
+--site-primary-600  /* link color */
+--site-primary-700  /* link hover */
 ```
 
-Use these variables in `global.css` instead of hardcoding colors so that
-light and dark mode both work automatically:
+Use these variables in `global.css` instead of hardcoding colors so that light
+mode, dark mode, and the configured palette all work automatically:
 
 ```css
 /* Good — adapts to theme */
-.my-element { color: var(--nextra-colors-gray-600, #4b5563); }
+.my-element { color: var(--site-gray-600); }
 
-/* Avoid — breaks dark mode */
+/* Avoid — breaks dark mode and ignores theme.color */
 .my-element { color: #4b5563; }
 ```
-
-The fallback value (after the comma) is used by browsers that don't support the
-variable. Set it to the light-mode value.
 
 ## Nextra's internal Tailwind
 
@@ -96,7 +91,7 @@ built-in styles.
 ## Adding custom styles
 
 1. Open `styles/global.css` and add your CSS at the end.
-2. Use `--nextra-colors-*` variables for any color that should adapt to dark mode.
+2. Use `--site-*` variables for any color that should adapt to dark mode.
 3. Restart the dev server (`npm run dev`) if a newly added class does not apply —
    Next.js hot-reloads JS but occasionally misses CSS-only changes.
 
@@ -127,7 +122,7 @@ Categories and tags render as pill chips. Two style variants are provided:
 
 | Class | Color | Used for |
 |-------|-------|---------|
-| `.chip.chip-category` | Blue (primary) | `categories:` frontmatter list |
+| `.chip.chip-category` | Primary (follows `theme.color`) | `categories:` frontmatter list |
 | `.chip.chip-tag` | Gray | `tags:` frontmatter list |
 
 To change chip appearance, edit the `.chip`, `.chip-category`, and `.chip-tag`

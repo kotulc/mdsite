@@ -51,7 +51,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(next)}
-      className="theme-toggle"
+      className="icon-link"
       aria-label={`Switch to ${next} theme`}
       title={`Current: ${current} — click for ${next}`}
     >

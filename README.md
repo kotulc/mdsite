@@ -94,23 +94,24 @@ Full schema with defaults:
 title: My Site
 
 # Optional — site identity
+description: ""              # SEO meta description added to every page
 repo_url: ""                 # shows a GitHub icon in the navbar when set
 feed_url: ""                 # slug of the section used as the per-page feed
+footer: ""                   # custom footer credits; empty keeps the default
 
 # Optional — layout
-theme_toggle: navbar         # "navbar" or "footer"
+theme_toggle: navbar         # "navbar" or "sidebar"
 toc: true                    # show table of contents
 meta_sidebar: true           # show metadata sidebar
 
+# Optional — theme presets (see docs/configuration.md for all values)
+theme:
+  color: default             # accent palette: default, slate, blue, emerald, rose, ...
+  typeset: sans              # body font stack: sans, serif, humanist, geometric, mono
+
 # Optional — ingest behavior
-ingest_readme: false         # sync README.md → about page
 flatten: []                  # list of section slugs to flatten (no subfolder in nav)
 nav_order: {}                # map of section slug → ordered list of page slugs
-
-# Optional — theming (Phase 2)
-content_style: ""
-theme_mood: ""
-logo_seed: 1
 
 # Paths — resolved relative to this file
 content: ./docs              # source markdown directory
@@ -175,12 +176,13 @@ Ship an `mdsite.yaml` in your repo root pointing at your docs folder:
 
 ```yaml
 title: My Project
-base_url: https://username.github.io
-base_path: /my-project
 repo_url: https://github.com/username/my-project
 content: ./docs
 output: ./dist
 ```
+
+If the site is served from a subpath, pass `BASE_PATH` as an environment variable at
+build time (see above) — it does not belong in `mdsite.yaml`.
 
 Then add your own publish step (GitHub Pages, Vercel, S3, etc.) after the build step.
 

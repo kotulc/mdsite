@@ -113,13 +113,13 @@ export default function MyWidget({ label }) {
 
 **2. Add CSS**
 
-Add styles to `styles/global.css`. Use `--nextra-colors-*` variables for theme-adaptive
+Add styles to `styles/global.css`. Use `--site-*` variables for theme-adaptive
 colors. See [Styling](/features/styling) for details.
 
 ```css
 .my-widget {
   padding: 0.5rem 1rem;
-  color: var(--nextra-colors-gray-600, #4b5563);
+  color: var(--site-gray-600);
 }
 ```
 
@@ -177,5 +177,5 @@ export default function MyWidget() {
 | `ThemeGenerator` | Derives color palette and logo hints from content signals |
 | `RelatedPages` | Semantic similarity-based "you might also like" links |
 
-These are Phase 2 features. The `content_style` and `theme_mood` fields in `mdsite.yaml`
-are reserved for the theming pipeline.
+These are Phase 2 features. Site-wide colors and fonts are already configurable today
+via the `theme` block in `mdsite.yaml` — see [Configuration](/configuration).

@@ -1,9 +1,14 @@
 title: mdsite
+description: Static documentation sites from plain markdown
 repo_url: https://github.com/kotulc/mdsite
 feed_url: updates
 theme_toggle: navbar
 toc: true
 meta_sidebar: true
+
+theme:
+  color: default
+  typeset: sans
 
 content: ./docs
 output: ./dist
@@ -14,5 +19,5 @@ flatten:
 nav_order:
   "": [about, getting-started, configuration]
   features: [overview, components]
-  specs: [format]
+  specifications: [format]
   updates: [welcome]
