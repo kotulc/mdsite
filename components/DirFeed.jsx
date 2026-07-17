@@ -9,6 +9,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import PageHeader from './PageHeader'
 import TagList from './TagList'
+import siteConfig from '../site.config'
 
 
 const md_components = (basePath) => ({
@@ -39,7 +40,8 @@ export default function DirFeed({ dir }) {
           <h2 className="feed-section-title">
             <Link href={e.url}>{e.title}</Link>
           </h2>
-          <PageHeader date={e.date} reading_time={e.reading_time} />
+          <PageHeader date={e.date}
+                      reading_time={siteConfig.reading_time === false ? null : e.reading_time} />
           <TagList categories={e.categories} tags={e.tags} />
           <div className="feed-section-content">
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={md_components(basePath)}>{e.content}</ReactMarkdown>

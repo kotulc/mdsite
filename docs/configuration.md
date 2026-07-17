@@ -31,6 +31,7 @@ consumed by Next.js and Nextra.
 | `theme_toggle` | string | `"navbar"` | Where the light/dark toggle appears: `"navbar"` or `"footer"` |
 | `toc` | boolean | `true` | Right sidebar: "On This Page" section navigation |
 | `meta_sidebar` | boolean | `true` | Right sidebar: tags, metrics, and related links below the TOC |
+| `reading_time` | boolean | `true` | Show estimated reading time in page headers and feeds |
 | `ingest_readme` | boolean | `false` | Sync `README.md` → `/about` page on each build |
 | `flatten` | list | `[]` | Section slugs rendered as inline feeds rather than individual pages |
 | `nav_order` | object | `{}` | Explicit nav ordering per directory — see below |

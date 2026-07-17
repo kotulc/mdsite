@@ -10,11 +10,12 @@ import siteConfig from './site.config'
 
 
 function PageMeta() {
-  /** Renders date, reading time, and tag chips. */
+  /** Renders date, reading time (unless disabled), and tag chips. */
   const { frontMatter } = useConfig()
+  const mins = siteConfig.reading_time === false ? null : frontMatter.reading_time
   return (
     <>
-      <PageHeader date={frontMatter.date} reading_time={frontMatter.reading_time} />
+      <PageHeader date={frontMatter.date} reading_time={mins} />
       <TagList categories={frontMatter.categories} tags={frontMatter.tags} />
     </>
   )

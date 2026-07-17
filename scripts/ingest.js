@@ -319,10 +319,11 @@ function ingest_dir(src_dir, dest_dir, rel) {
 
 
 function ensure_h1(mdx_path, title) {
-  /** Prepend # title heading if body has no h1. */
+  /** Prepend # title heading if body has no h1 on any line outside code fences
+   *  (mdx bodies may open with import statements before their heading). */
   const content = fs.readFileSync(mdx_path, 'utf8')
-  const body    = content.replace(/^---[\s\S]*?---\r?\n/, '')
-  if (/^#\s/.test(body.trimStart())) return
+  const body    = content.replace(/^---[\s\S]*?---\r?\n/, '').replace(/```[\s\S]*?```/g, '')
+  if (/^#\s/m.test(body)) return
   const updated = content.replace(/(^---[\s\S]*?---\r?\n)/, `$1\n# ${title}\n\n`)
   fs.writeFileSync(mdx_path, updated)
 }
@@ -395,7 +396,7 @@ function run(config) {
 
 // --- Exports ---
 
-module.exports = { parse_fm, sort_entries, extract_content, auto_index, norm_path, slug_to_title, sync_components, run }
+module.exports = { parse_fm, sort_entries, extract_content, auto_index, ensure_h1, norm_path, slug_to_title, sync_components, run }
 
 
 // --- Main (direct invocation: npm run ingest [source-dir]) ---
