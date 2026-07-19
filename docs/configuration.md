@@ -36,6 +36,8 @@ consumed by Next.js and Nextra.
 | `reading_time` | boolean | `true` | Show estimated reading time in page headers and feeds |
 | `theme.color` | string | `"default"` | Named accent palette — see [Theme](#theme) below |
 | `theme.typeset` | string | `"sans"` | Named body font stack — see [Theme](#theme) below |
+| `theme.navbar` | string | `""` | Navbar background: `"primary"` (theme tint) or any CSS color |
+| `theme.footer` | string | `""` | Footer background: `"primary"` (theme tint) or any CSS color |
 | `flatten` | list | `[]` | Section slugs rendered as inline feeds rather than individual pages |
 | `nav_order` | object | `{}` | Explicit nav ordering per directory — see below |
 | `content` | path | `./docs` | Source markdown directory (resolved relative to this file) |
@@ -84,6 +86,19 @@ requests, no layout shift:
 
 Code blocks always render monospace regardless of typeset. Unknown `color` or
 `typeset` names fail the build with the list of valid values.
+
+**`theme.navbar`** and **`theme.footer`** override the navbar and footer backgrounds.
+Set `"primary"` for a soft tint derived from `theme.color` (adapts to dark mode), or any
+CSS color (e.g. `"#1e293b"`, `"hsl(215 20% 95%)"`) applied as-is in both modes:
+
+```yaml
+theme:
+  color: emerald
+  navbar: primary
+  footer: "hsl(161 30% 96%)"
+```
+
+Leave empty to keep Nextra's default white/dark backgrounds.
 
 ## Nav ordering
 

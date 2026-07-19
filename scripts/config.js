@@ -18,7 +18,7 @@ const DEFAULTS = {
   toc:            true,
   meta_sidebar:   true,
   reading_time:   true,
-  theme:          { color: 'default', typeset: 'sans' },
+  theme:          { color: 'default', typeset: 'sans', navbar: '', footer: '' },
   flatten:        [],
   nav_order:      {},
   content:        './docs',

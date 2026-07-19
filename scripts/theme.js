@@ -33,8 +33,9 @@ const TYPESETS = {
 
 
 function resolve_theme(theme) {
-  /** Validate a theme block and return { color, typeset, hue, saturation, font_stack }. */
-  const { color, typeset } = theme
+  /** Validate a theme block and return resolved values for site.config.js.
+   *  navbar/footer are background overrides: '' (off), 'primary', or any CSS color. */
+  const { color, typeset, navbar = '', footer = '' } = theme
 
   if (!(color in COLOR_PRESETS)) {
     throw new Error(`mdsite.yaml: unknown theme.color '${color}' (valid: ${Object.keys(COLOR_PRESETS).join(', ')})`)
@@ -44,7 +45,7 @@ function resolve_theme(theme) {
   }
 
   const { hue, saturation } = COLOR_PRESETS[color]
-  return { color, typeset, hue, saturation, font_stack: TYPESETS[typeset] }
+  return { color, typeset, navbar, footer, hue, saturation, font_stack: TYPESETS[typeset] }
 }
 
 

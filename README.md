@@ -108,6 +108,8 @@ meta_sidebar: true           # show metadata sidebar
 theme:
   color: default             # accent palette: default, slate, blue, emerald, rose, ...
   typeset: sans              # body font stack: sans, serif, humanist, geometric, mono
+  navbar: ""                 # navbar background: "primary" (theme tint) or any CSS color
+  footer: ""                 # footer background: "primary" (theme tint) or any CSS color
 
 # Optional — ingest behavior
 flatten: []                  # list of section slugs to flatten (no subfolder in nav)

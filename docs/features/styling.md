@@ -116,9 +116,9 @@ Nextra layout
 `MetaSidebar` returns `null` when no frontmatter metadata is present, so the
 divider and sections only appear on pages that have tags, metrics, or related links.
 
-## Chip pills
+## Chips
 
-Categories and tags render as pill chips. Two style variants are provided:
+Categories and tags render as rectangular chips. Two style variants are provided:
 
 | Class | Color | Used for |
 |-------|-------|---------|

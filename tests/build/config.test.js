@@ -26,9 +26,16 @@ describe('load_config — theme resolution', () => {
     /** Config without a theme block resolves to the default Nextra palette and sans typeset. */
     const cfg = load_config(write_yaml('title: t'))
     expect(cfg.theme).toEqual({
-      color: 'default', typeset: 'sans',
+      color: 'default', typeset: 'sans', navbar: '', footer: '',
       hue: { light: 212, dark: 204 }, saturation: 100, font_stack: '',
     })
+  })
+
+  test('test_theme_navbar_footer_passthrough', () => {
+    /** navbar/footer accept 'primary' or any CSS color and pass through unchanged. */
+    const cfg = load_config(write_yaml('title: t\ntheme:\n  navbar: primary\n  footer: "#1e293b"'))
+    expect(cfg.theme.navbar).toBe('primary')
+    expect(cfg.theme.footer).toBe('#1e293b')
   })
 
   test('test_theme_partial_block_merges_defaults', () => {
@@ -79,7 +86,10 @@ describe('write_site_config — generated keys', () => {
     const out = require(path.join(tmp, 'site.config.js'))
     expect(out.description).toBe('d')
     expect(out.footer).toBe('f')
-    expect(out.theme).toEqual({ color: 'emerald', typeset: 'sans', hue: 161, saturation: 94, font_stack: '' })
+    expect(out.theme).toEqual({
+      color: 'emerald', typeset: 'sans', navbar: '', footer: '',
+      hue: 161, saturation: 94, font_stack: '',
+    })
   })
 
   test('test_write_site_config_omits_dead_keys', () => {
