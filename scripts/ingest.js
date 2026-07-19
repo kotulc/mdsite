@@ -369,6 +369,20 @@ function sync_components(components_dir) {
 }
 
 
+function sync_assets(assets_dir) {
+  /** Mirror consumer-supplied static assets into public/assets/ so pages can
+   *  fetch them at runtime (e.g. `${basePath}/assets/graph.json`). The
+   *  directory is regenerated each build; an empty/unset config removes it. */
+  const dest = path.join(PUB_DIR, 'assets')
+  fs.rmSync(dest, { recursive: true, force: true })
+
+  if (!assets_dir || !fs.existsSync(assets_dir)) return []
+
+  fs.cpSync(assets_dir, dest, { recursive: true })
+  return fs.readdirSync(dest)
+}
+
+
 function run(config) {
   /** Execute the full ingest pipeline with the given config object. */
   _config = config
@@ -387,6 +401,9 @@ function run(config) {
   const custom = sync_components(config.components)
   if (custom.length) console.log(`  Synced ${custom.length} custom component(s) into components/custom/`)
 
+  const assets = sync_assets(config.assets)
+  if (assets.length) console.log(`  Synced ${assets.length} asset(s) into public/assets/`)
+
   console.log(`  Mirrored source tree into pages/`)
   console.log('Done.\n')
 
@@ -396,7 +413,7 @@ function run(config) {
 
 // --- Exports ---
 
-module.exports = { parse_fm, sort_entries, extract_content, auto_index, ensure_h1, norm_path, slug_to_title, sync_components, run }
+module.exports = { parse_fm, sort_entries, extract_content, auto_index, ensure_h1, norm_path, slug_to_title, sync_assets, sync_components, run }
 
 
 // --- Main (direct invocation: npm run ingest [source-dir]) ---

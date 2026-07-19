@@ -24,6 +24,7 @@ const DEFAULTS = {
   content:        './docs',
   output:         './dist',
   components:     '',
+  assets:         '',
 }
 
 
@@ -41,6 +42,7 @@ function load_config(yaml_path) {
   cfg.content = path.resolve(dir, cfg.content)
   cfg.output  = path.resolve(dir, cfg.output)
   if (cfg.components) cfg.components = path.resolve(dir, cfg.components)
+  if (cfg.assets)     cfg.assets     = path.resolve(dir, cfg.assets)
 
   return cfg
 }

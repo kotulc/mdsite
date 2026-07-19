@@ -41,6 +41,7 @@ consumed by Next.js and Nextra.
 | `content` | path | `./docs` | Source markdown directory (resolved relative to this file) |
 | `output` | path | `./dist` | Output directory for the built site (resolved relative to this file) |
 | `components` | path | `""` | Optional directory of consumer React components, mirrored into `components/custom/` each build — content MDX can import them, e.g. `import Widget from '../components/custom/Widget'` |
+| `assets` | path | `""` | Optional directory of consumer static files (JSON data, etc.), mirrored into `public/assets/` each build — pages can fetch them at `${basePath}/assets/<file>` |
 
 ## Example
 
