@@ -19,7 +19,9 @@ related:
 # Metadata Display
 
 Metadata is surfaced automatically on every page — no MDX imports required.
-All display is driven by frontmatter fields read by `theme.config.jsx`.
+All display is driven by frontmatter fields read by `theme.config.jsx`. Frontmatter
+itself is optional: pages without it get a generated title, and the
+[enrichment step](/configuration#enrichment) can fill the remaining fields from content.
 
 ## Frontmatter schema
 
@@ -27,9 +29,9 @@ All display is driven by frontmatter fields read by `theme.config.jsx`.
 |-------|------|--------|
 | `title` | string | Page title shown in heading and nav |
 | `date` | YYYY-MM-DD | Formatted date below title; enables date-based sorting |
-| `order` | integer | Nav position within its directory; lower numbers appear first |
-| `categories` | list | Blue chip pills below the title |
-| `tags` | list | Gray chip pills below the title |
+| `description` | string | Per-page SEO meta description |
+| `categories` | list | Category chips below the title |
+| `tags` | list | Tag chips below the title |
 | `reading_time` | integer | Auto-injected by the pipeline; displays as "N min read" |
 
 Example:
@@ -58,29 +60,15 @@ Both arrays are optional; the component returns null when both are empty.
 all dated posts with title, date, reading time, and category chips. It is placed
 on the auto-generated `posts/index.mdx` page whenever dated posts are found.
 
-**`MetaSidebar`** renders a sticky right-hand sidebar with categories, tags, and
-any numeric frontmatter fields as labelled metrics. It only appears when there is
-content to show, and is hidden on screens narrower than 1024 px.
-
 **`SiteFooter`** renders the page footer (copyright, build timestamp, credits).
 Edit `components/SiteFooter.jsx` directly to customize the footer across all pages.
 
 ## Metrics
 
-Any numeric frontmatter field not in the reserved set (`title`, `date`, `categories`,
-`tags`, `reading_time`) is displayed in the sidebar as a metric with its score:
-
-```yaml
----
-title: My Analysis
-readability: 72
-sentiment: 0.85
-complexity: 3
----
-```
-
-Field names use underscores which are replaced with spaces in the display
-(e.g. `reading_ease` → "reading ease").
+When `enrich.metrics` is configured, the build computes polarity, spam, and toxicity
+scores for each page and its `##` sections and writes them to `public/page-meta.json`,
+keyed by page url. Components can fetch the file at `${basePath}/page-meta.json`.
+See the [Metadata Contract](/specifications/metadata) spec for the schema.
 
 ## Post index
 

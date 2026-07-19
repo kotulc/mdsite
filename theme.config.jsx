@@ -1,7 +1,6 @@
 import { useConfig } from 'nextra-theme-docs'
 import PageHeader from './components/PageHeader'
 import TagList from './components/TagList'
-import MetaSidebar from './components/MetaSidebar'
 import SiteFooter from './components/SiteFooter'
 import GitHubLink from './components/GitHubLink'
 import FeedLink from './components/FeedLink'
@@ -78,7 +77,11 @@ export default {
   },
   footer: { text: <SiteFooter /> },
   useNextSeoProps() {
-    return { titleTemplate: `%s – ${siteConfig.title}` }
+    const { frontMatter } = useConfig()
+    return {
+      titleTemplate: `%s – ${siteConfig.title}`,
+      description: frontMatter.description || siteConfig.description || undefined,
+    }
   },
   head: (
     <>
@@ -89,9 +92,7 @@ export default {
   ),
   feedback: { content: null },
   editLink: { component: EditLink },
-  toc: siteConfig.toc === false
-    ? { component: () => null }
-    : { extraContent: siteConfig.meta_sidebar !== false ? MetaSidebar : undefined },
+  toc: siteConfig.toc === false ? { component: () => null } : {},
   components: { h1: PageTitle },
   main: ({ children }) => <>{children}</>,
 }

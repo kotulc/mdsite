@@ -29,7 +29,6 @@ appear on every page are registered globally in `theme.config.jsx`.
 |-----------|------|----------------|
 | `PageHeader` | `PageHeader.jsx` | Below page title — date and reading time |
 | `TagList` | `TagList.jsx` | Below `PageHeader` — category and tag chips |
-| `MetaSidebar` | `MetaSidebar.jsx` | Right TOC column — below section headings (`toc.extraContent`) |
 | `SiteFooter` | `SiteFooter.jsx` | Site-wide footer |
 | `GitHubLink` | `GitHubLink.jsx` | Navbar — circular GitHub icon |
 | `ThemeToggle` | `ThemeToggle.jsx` | Navbar — light/dark/system toggle |
@@ -52,17 +51,6 @@ Renders `categories` as blue chips and `tags` as gray chips below `PageHeader`.
 Returns `null` when both arrays are empty.
 
 Props: `categories` (string[]), `tags` (string[]).
-
-### MetaSidebar
-
-Sticky right-hand sidebar with three sections, each rendered only when data is present:
-
-- **Tags** — `categories` (blue) and `tags` (gray) from frontmatter
-- **Metrics** — any numeric frontmatter field not in the reserved set
-  (`title`, `date`, `categories`, `tags`, `reading_time`, `related`)
-- **Related** — `related` frontmatter array of `{ title, url }` objects
-
-Hidden below 1024 px via CSS media query. Reads frontmatter via `useConfig()`.
 
 ### SiteFooter
 
@@ -133,14 +121,10 @@ import MyWidget from './components/MyWidget'
 
 // In the main layout:
 main: ({ children }) => (
-  <div className="page-layout">
-    <div className="page-content">
-      <PageMeta />
-      {children}
-      <MyWidget label="hello" />
-    </div>
-    <MetaSidebar />
-  </div>
+  <>
+    {children}
+    <MyWidget label="hello" />
+  </>
 ),
 ```
 

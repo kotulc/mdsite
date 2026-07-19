@@ -101,20 +101,20 @@ The `main` key in `theme.config.jsx` wraps only the page content area. Nextra
 renders the left nav and right TOC column outside of `main`, so no custom flex
 layout is needed.
 
-`MetaSidebar` is rendered via `toc.extraContent`, which places it below the
-section headings in Nextra's right TOC column:
+Consumer components can render in Nextra's right TOC column via `toc.extraContent`
+in `theme.config.jsx`:
 
 ```
 Nextra layout
 ├── Left nav (Nextra)
-├── main  →  PageMeta + page content + PageContinuation
+├── main  →  PageMeta + page content
 └── Right TOC column (Nextra)
     ├── "On This Page" heading list
-    └── .meta-sidebar-content  (tags, metrics, related)
+    └── toc.extraContent  (optional custom component)
 ```
 
-`MetaSidebar` returns `null` when no frontmatter metadata is present, so the
-divider and sections only appear on pages that have tags, metrics, or related links.
+The `.meta-sidebar-*` and `.filter-panel` classes in `global.css` style components
+placed in this column.
 
 ## Chips
 

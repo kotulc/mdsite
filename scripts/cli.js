@@ -25,7 +25,7 @@ function parse_args(argv) {
 }
 
 
-function cmd_build(flags) {
+async function cmd_build(flags) {
   /** Load config, ingest content, build static site to output path. */
   if (!flags.config) {
     console.error('Error: --config <path> is required')
@@ -44,7 +44,7 @@ function cmd_build(flags) {
   console.log(`  content: ${config.content}`)
   console.log(`  output:  ${config.output}\n`)
 
-  ingest.run(config)
+  await ingest.run(config)
 
   const result = spawnSync('npm', ['run', 'build'], {
     cwd:   ROOT,
@@ -62,7 +62,7 @@ function cmd_build(flags) {
 const { command, flags } = parse_args(process.argv)
 
 if (command === 'build') {
-  cmd_build(flags)
+  cmd_build(flags).catch(err => { console.error(err.message); process.exit(1) })
 } else {
   console.error(`Unknown command: ${command || '(none)'}`)
   console.error('Usage: mdsite build --config <path>')

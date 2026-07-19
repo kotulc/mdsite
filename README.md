@@ -102,7 +102,6 @@ footer: ""                   # custom footer credits; empty keeps the default
 # Optional — layout
 theme_toggle: navbar         # "navbar" or "sidebar"
 toc: true                    # show table of contents
-meta_sidebar: true           # show metadata sidebar
 
 # Optional — theme presets (see docs/configuration.md for all values)
 theme:
@@ -114,6 +113,13 @@ theme:
 # Optional — ingest behavior
 flatten: []                  # list of section slugs to flatten (no subfolder in nav)
 nav_order: {}                # map of section slug → ordered list of page slugs
+
+# Optional — NLP enrichment via a local taggly instance (github.com/kotulc/taggly)
+enrich:
+  url: ""                    # e.g. http://127.0.0.1:8000; empty disables enrichment
+  fields: [description, tags, categories]   # frontmatter fields generated when missing
+  metrics: []                # optional page/section scores: polarity, spam, toxicity
+  strict: true               # fail the build if the service is unreachable
 
 # Paths — resolved relative to this file
 content: ./docs              # source markdown directory
@@ -226,21 +232,6 @@ git push origin v1.0.0
 The publish workflow (`.github/workflows/publish-image.yml`) builds and pushes:
 - `ghcr.io/kotulc/mdsite:latest`
 - `ghcr.io/kotulc/mdsite:v1.0.0`
-
-
-## Features
-
-- **Markdown → MDX** — automatic conversion, any folder structure
-- **Images** — copied and path-rewritten automatically; corrupt EXIF data stripped
-- **Reading time** — estimated and injected into every page's frontmatter
-- **Tags and categories** — rendered as pill chips below each title and in the sidebar
-- **Sidebar metrics** — any numeric frontmatter field surfaces as a labeled score
-- **Nav ordering** — configure page and folder order via `nav_order` in YAML or `order:` in frontmatter
-- **Per-page feed** — scroll to the bottom of any page to load the next one inline
-- **Theme toggle** — light / dark / system toggle in the navbar
-- **GitHub header icon** — circular GitHub repo link, auto-shown from `repo_url`
-- **YAML config** — single config file drives the entire build
-- **Docker** — packaged as a container for use in any CI/CD pipeline
 
 
 ## Roadmap

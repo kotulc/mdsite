@@ -42,8 +42,8 @@ One-paragraph description of purpose.
 ## Current Specs
 
 - [Ingest Pipeline](ingest-pipeline) — content transformation and output generation
+- [Metadata Contract](metadata) — the per-page metadata record, sources, and landing spots
 - [Navtree Naming](navtree-naming) — how page and directory labels are derived for navigation
 - [Page Metadata](page-metadata) — date, reading time, category and tag chips
-- [Metadata Sidebar](meta-sidebar) — per-page metrics, tags, and related links in the TOC column
 - [Post Index](post-index) — reverse-chronological dated post listing
 - [Site Configuration](site-configuration) — all `mdsite.yaml` fields and their effects

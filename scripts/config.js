@@ -7,6 +7,7 @@ const fs   = require('fs')
 const path = require('path')
 const yaml = require('js-yaml')
 const { resolve_theme } = require('./theme')
+const { FIELDS, METRICS } = require('./enrich')
 
 
 const DEFAULTS = {
@@ -16,9 +17,9 @@ const DEFAULTS = {
   footer:         '',
   theme_toggle:   'navbar',
   toc:            true,
-  meta_sidebar:   true,
   reading_time:   true,
   theme:          { color: 'default', typeset: 'sans', navbar: '', footer: '' },
+  enrich:         { url: '', fields: ['description', 'tags', 'categories'], metrics: [], strict: true },
   flatten:        [],
   nav_order:      {},
   content:        './docs',
@@ -37,7 +38,8 @@ function load_config(yaml_path) {
 
   if (!cfg.title) throw new Error(`mdsite.yaml: 'title' is required`)
 
-  cfg.theme = resolve_theme({ ...DEFAULTS.theme, ...(raw.theme || {}) })
+  cfg.theme  = resolve_theme({ ...DEFAULTS.theme, ...(raw.theme || {}) })
+  cfg.enrich = validate_enrich({ ...DEFAULTS.enrich, ...(raw.enrich || {}) })
 
   cfg.content = path.resolve(dir, cfg.content)
   cfg.output  = path.resolve(dir, cfg.output)
@@ -48,12 +50,28 @@ function load_config(yaml_path) {
 }
 
 
+function validate_enrich(enrich) {
+  /** Validate enrich.fields/metrics names against the routes known to scripts/enrich.js. */
+  for (const f of enrich.fields) {
+    if (!(f in FIELDS)) {
+      throw new Error(`mdsite.yaml: unknown enrich.fields '${f}' (valid: ${Object.keys(FIELDS).join(', ')})`)
+    }
+  }
+  for (const m of enrich.metrics) {
+    if (!(m in METRICS)) {
+      throw new Error(`mdsite.yaml: unknown enrich.metrics '${m}' (valid: ${Object.keys(METRICS).join(', ')})`)
+    }
+  }
+  return enrich
+}
+
+
 function write_site_config(config, dest_dir) {
   /** Generate site.config.js from a config object for Next.js/Nextra consumption. */
   const dir  = dest_dir || path.join(__dirname, '..')
   const keys = [
     'title', 'repo_url', 'feed_url', 'description', 'footer',
-    'theme_toggle', 'toc', 'meta_sidebar', 'reading_time',
+    'theme_toggle', 'toc', 'reading_time',
     'theme', 'flatten', 'nav_order',
   ]
   const body = keys

@@ -6,7 +6,10 @@
  *   - Copies images/ subdirectories to public/images/<rel-path>/
  *   - Rewrites relative image refs to absolute /images/<rel-path>/... URLs
  *   - Strips corrupt EXIF segments from copied JPEGs
+ *   - Creates frontmatter (title from first h1) for pages without any
  *   - Injects reading_time into each page's frontmatter
+ *   - Optionally enriches pages via a taggly NLP service (see scripts/enrich.js):
+ *     fills missing description/tags/categories, writes metrics to public/page-meta.json
  *   - Auto-generates _meta.json at each level; sort order:
  *       nav_order config > date (newest-first) > alpha
  *   - For flatten[] directories: writes public/dir-feeds/<name>.json and generates
@@ -19,6 +22,7 @@
 const fs = require('fs')
 const path = require('path')
 const { strip_dir } = require('./fix-exif')
+const enrich = require('./enrich')
 
 
 const ROOT    = path.join(__dirname, '..')
@@ -30,6 +34,9 @@ const PUB_DIR = path.join(ROOT, 'public')
 // Module-level config: set by run(config), falls back to site.config.js for local dev
 let _config = null
 function get_config() { return _config || require('../site.config') }
+
+// Per-page metrics collected during the walk, written to public/page-meta.json by run()
+let _page_meta = {}
 
 
 function parse_fm(content) {
@@ -80,6 +87,34 @@ function add_reading_time(mdx_path) {
   const updated = content.replace(/^(---\r?\n[\s\S]*?)(\r?\n---\r?\n)/, `$1\nreading_time: ${mins}$2`)
   fs.writeFileSync(mdx_path, updated)
   return mins
+}
+
+
+function ensure_fm(mdx_path, base) {
+  /** Prepend a frontmatter block to pages without one.
+   *  Title precedence: first h1 in the body, else title-cased slug. */
+  const content = fs.readFileSync(mdx_path, 'utf8')
+  if (/^---\r?\n[\s\S]*?\r?\n---/.test(content)) return
+  const h1 = content.replace(/```[\s\S]*?```/g, '').match(/^#\s+(.+)$/m)
+  const title = h1 ? h1[1].trim() : slug_to_title(base)
+  fs.writeFileSync(mdx_path, `---\ntitle: ${JSON.stringify(title)}\n---\n\n${content}`)
+}
+
+
+async function enrich_page(mdx_path, fm, url) {
+  /** Optionally fill missing frontmatter fields and record metrics for a page.
+   *  No-op when enrich.url is unset; strict mode rethrows service errors. */
+  const cfg = get_config().enrich
+  if (!cfg || !cfg.url) return
+  try {
+    const text = extract_content(fs.readFileSync(mdx_path, 'utf8'))
+    enrich.inject_fm(mdx_path, await enrich.enrich_fields(cfg, fm, text))
+    const metrics = await enrich.page_metrics(cfg, text)
+    if (metrics) _page_meta[url] = metrics
+  } catch (err) {
+    if (cfg.strict !== false) throw err
+    console.warn(`  Warning: enrichment failed for ${url}: ${err.message}`)
+  }
 }
 
 
@@ -199,7 +234,7 @@ function auto_index(dest_dir, sorted, rel) {
 }
 
 
-function ingest_dir(src_dir, dest_dir, rel) {
+async function ingest_dir(src_dir, dest_dir, rel) {
   /** Recursively mirror src_dir → dest_dir.
    *  rel: path from SRC to src_dir using forward slashes ('' for root).
    *  Returns { title } from the directory's index page (or the directory name). */
@@ -230,7 +265,7 @@ function ingest_dir(src_dir, dest_dir, rel) {
 
     if (stat.isDirectory()) {
       const sub_rel = rel ? `${rel}/${entry}` : entry
-      const { title } = ingest_dir(src_entry, path.join(dest_dir, entry), sub_rel)
+      const { title } = await ingest_dir(src_entry, path.join(dest_dir, entry), sub_rel)
       entries.push({ slug: entry, title, date: '' })
       continue
     }
@@ -248,17 +283,22 @@ function ingest_dir(src_dir, dest_dir, rel) {
     fs.copyFileSync(src_entry, dest)
     rewrite_img_refs(dest, img_url)
     rewrite_md_links(dest, url_base)
+    ensure_fm(dest, base)
     const mins = add_reading_time(dest)
-    const fm   = parse_fm(fs.readFileSync(dest, 'utf8'))
+    let fm = parse_fm(fs.readFileSync(dest, 'utf8'))
     if (slug !== 'index') ensure_h1(dest, fm.title || slug)
 
     const parts = [...(rel ? rel.split('/') : []), ...(slug === 'index' ? [] : [slug])]
     const url   = '/' + parts.join('/')
 
+    await enrich_page(dest, fm, url || '/')
+    fm = parse_fm(fs.readFileSync(dest, 'utf8'))
+
     const record = {
       slug,
       title:        fm.title        || slug_to_title(base),
       date:         fm.date         || '',
+      description:  fm.description  || '',
       categories:   Array.isArray(fm.categories) ? fm.categories : [],
       tags:         Array.isArray(fm.tags)        ? fm.tags        : [],
       reading_time: mins,
@@ -383,17 +423,35 @@ function sync_assets(assets_dir) {
 }
 
 
-function run(config) {
+async function run(config) {
   /** Execute the full ingest pipeline with the given config object. */
   _config = config
+  _page_meta = {}
   const src = config.content
 
   console.log(`\nIngesting from: ${src}`)
 
+  if (config.enrich?.url) {
+    try {
+      await enrich.check_service(config.enrich.url)
+      console.log(`  Enriching via taggly at ${config.enrich.url}`)
+    } catch (err) {
+      if (config.enrich.strict !== false) throw err
+      console.warn(`  Warning: ${err.message} — skipping enrichment`)
+      config.enrich = { ...config.enrich, url: '' }
+    }
+  }
+
   fs.rmSync(PAGES,   { recursive: true, force: true })
   fs.rmSync(PUB_IMG, { recursive: true, force: true })
+  fs.rmSync(path.join(PUB_DIR, 'page-meta.json'), { force: true })
 
-  ingest_dir(src, PAGES, '')
+  await ingest_dir(src, PAGES, '')
+
+  if (Object.keys(_page_meta).length) {
+    fs.writeFileSync(path.join(PUB_DIR, 'page-meta.json'), JSON.stringify(_page_meta, null, 2) + '\n')
+    console.log(`  Wrote metrics for ${Object.keys(_page_meta).length} page(s) to public/page-meta.json`)
+  }
 
   const app_src = path.join(ROOT, '_app.jsx')
   if (fs.existsSync(app_src)) fs.copyFileSync(app_src, path.join(PAGES, '_app.jsx'))
@@ -413,13 +471,15 @@ function run(config) {
 
 // --- Exports ---
 
-module.exports = { parse_fm, sort_entries, extract_content, auto_index, ensure_h1, norm_path, slug_to_title, sync_assets, sync_components, run }
+module.exports = { parse_fm, sort_entries, extract_content, auto_index, ensure_fm, ensure_h1, norm_path, slug_to_title, sync_assets, sync_components, run }
 
 
 // --- Main (direct invocation: npm run ingest [source-dir]) ---
+// Note: falls back to site.config.js, which carries no enrich block — enrichment
+// runs only through the CLI build (node scripts/cli.js build --config mdsite.yaml).
 
 if (require.main === module) {
   const src = path.resolve(process.argv[2] || path.join(ROOT, 'docs'))
   const cfg = { ...require('../site.config'), content: src }
-  run(cfg)
+  run(cfg).catch(err => { console.error(err.message); process.exit(1) })
 }

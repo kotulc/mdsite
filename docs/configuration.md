@@ -32,8 +32,11 @@ consumed by Next.js and Nextra.
 | `footer` | string | `""` | Custom footer credits text; empty keeps "Powered by mdsite and Nextra" |
 | `theme_toggle` | string | `"navbar"` | Where the light/dark toggle appears: `"navbar"` or `"sidebar"` |
 | `toc` | boolean | `true` | Right sidebar: "On This Page" section navigation |
-| `meta_sidebar` | boolean | `true` | Right sidebar: tags, metrics, and related links below the TOC |
 | `reading_time` | boolean | `true` | Show estimated reading time in page headers and feeds |
+| `enrich.url` | string | `""` | Base URL of a running [taggly](https://github.com/kotulc/taggly) instance; empty disables enrichment |
+| `enrich.fields` | list | `[description, tags, categories]` | Frontmatter fields to generate when missing |
+| `enrich.metrics` | list | `[]` | Page/section scores to compute: `polarity`, `spam`, `toxicity` |
+| `enrich.strict` | boolean | `true` | Fail the build when the service is unreachable; `false` warns and skips |
 | `theme.color` | string | `"default"` | Named accent palette — see [Theme](#theme) below |
 | `theme.typeset` | string | `"sans"` | Named body font stack — see [Theme](#theme) below |
 | `theme.navbar` | string | `""` | Navbar background: `"primary"` (theme tint) or any CSS color |
@@ -100,6 +103,22 @@ theme:
 
 Leave empty to keep Nextra's default white/dark backgrounds.
 
+## Enrichment
+
+The `enrich` block connects the build to a local [taggly](https://github.com/kotulc/taggly)
+NLP service so pages need no hand-written frontmatter — missing `description`, `tags`, and
+`categories` are generated from the page content (explicit frontmatter always wins):
+
+```yaml
+enrich:
+  url: http://127.0.0.1:8000
+  metrics: [polarity, spam, toxicity]   # optional page/section scores
+```
+
+Metrics are written to `public/page-meta.json`, keyed by page url, with scores for the
+whole page and each `##` section. With `url` unset the build makes no network calls.
+See the [Metadata Contract](/specifications/metadata) spec for the full schema.
+
 ## Nav ordering
 
 By default the pipeline sorts pages newest-first by `date`, or alphabetically.
@@ -113,10 +132,7 @@ nav_order:
 
 The key `""` refers to the source root. Other keys are subdirectory slugs.
 Folders and pages can be mixed. Slugs not listed append alphabetically after
-the explicit entries.
-
-For individual pages without a full directory listing, add `order: N` to the
-page's frontmatter instead — lower numbers appear first.
+the explicit entries; dated pages sort newest-first.
 
 ## BASE_PATH environment variable
 

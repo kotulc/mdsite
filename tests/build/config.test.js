@@ -59,6 +59,37 @@ describe('load_config — theme resolution', () => {
 })
 
 
+describe('load_config — enrich block', () => {
+  test('test_enrich_defaults_applied', () => {
+    /** Config without an enrich block resolves to disabled strict enrichment. */
+    const cfg = load_config(write_yaml('title: t'))
+    expect(cfg.enrich).toEqual({
+      url: '', fields: ['description', 'tags', 'categories'], metrics: [], strict: true,
+    })
+  })
+
+  test('test_enrich_partial_block_merges_defaults', () => {
+    /** An enrich block with only url keeps default fields and strict mode. */
+    const cfg = load_config(write_yaml('title: t\nenrich:\n  url: http://127.0.0.1:8000'))
+    expect(cfg.enrich.url).toBe('http://127.0.0.1:8000')
+    expect(cfg.enrich.fields).toEqual(['description', 'tags', 'categories'])
+    expect(cfg.enrich.strict).toBe(true)
+  })
+
+  test('test_enrich_invalid_field_throws', () => {
+    /** Unknown enrich field fails config loading with the valid names. */
+    const p = write_yaml('title: t\nenrich:\n  fields: [summary]')
+    expect(() => load_config(p)).toThrow(/unknown enrich\.fields 'summary'.*description, tags, categories/)
+  })
+
+  test('test_enrich_invalid_metric_throws', () => {
+    /** Unknown enrich metric fails config loading with the valid names. */
+    const p = write_yaml('title: t\nenrich:\n  metrics: [sentiment]')
+    expect(() => load_config(p)).toThrow(/unknown enrich\.metrics 'sentiment'.*polarity, spam, toxicity/)
+  })
+})
+
+
 describe('resolve_theme — preset tables', () => {
   test.each(Object.entries(COLOR_PRESETS))(
     'test_theme_color_preset_%s', (name, preset) => {
@@ -93,11 +124,13 @@ describe('write_site_config — generated keys', () => {
   })
 
   test('test_write_site_config_omits_dead_keys', () => {
-    /** Removed keys (content_style, theme_mood, logo_seed) never reach site.config.js. */
+    /** Removed and build-only keys never reach site.config.js. */
     write_site_config(load_config(write_yaml('title: t')), tmp)
     const out = require(path.join(tmp, 'site.config.js'))
     expect(out).not.toHaveProperty('content_style')
     expect(out).not.toHaveProperty('theme_mood')
     expect(out).not.toHaveProperty('logo_seed')
+    expect(out).not.toHaveProperty('meta_sidebar')
+    expect(out).not.toHaveProperty('enrich')
   })
 })

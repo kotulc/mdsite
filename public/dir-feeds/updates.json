@@ -3,6 +3,7 @@
     "slug": "welcome",
     "title": "Welcome",
     "date": "2026-03-07",
+    "description": "",
     "categories": [
       "announcement"
     ],
@@ -19,6 +20,7 @@
     "slug": "plans",
     "title": "Future Plans",
     "date": "2026-03-08",
+    "description": "",
     "categories": [
       "roadmap"
     ],
