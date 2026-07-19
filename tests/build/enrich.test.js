@@ -1,19 +1,17 @@
 /**
  * Unit tests for the NLP enrichment step: field resolution, section splitting,
- * frontmatter injection, and service failure. Uses the repo README (no frontmatter)
- * as the canonical fixture; all taggly calls are mocked — no live service required.
+ * metric aggregation, and service failure. Uses the repo README body (frontmatter
+ * stripped) as the canonical fixture; all taggly calls are mocked — no live service.
  */
 const fs   = require('fs')
-const os   = require('os')
 const path = require('path')
 
-const { check_service, enrich_fields, page_metrics, split_sections, inject_fm } = require('../../scripts/enrich')
-const { ensure_fm, parse_fm } = require('../../scripts/ingest')
+const { check_service, enrich_fields, page_metrics, mean_scores, split_sections } = require('../../scripts/enrich')
 
 // README body with any frontmatter stripped — the canonical no-frontmatter fixture
 const README = fs.readFileSync(path.join(__dirname, '../../README.md'), 'utf8')
   .replace(/^---[\s\S]*?---\r?\n/, '').trimStart()
-const CFG    = { url: 'http://test', fields: ['description', 'tags', 'categories'], metrics: [], strict: true }
+const CFG = { url: 'http://test', fields: ['description', 'tags', 'categories'], metrics: [], strict: true }
 
 // Canned taggly responses by route prefix
 const RESPONSES = {
@@ -22,7 +20,7 @@ const RESPONSES = {
   '/tag':   { tags: { topics: ['static sites', 'docs', 'markdown', 'extra'] } },
   '/polar': { tags: [], scores: { negative: 0.1, neutral: 0.4, positive: 0.5 } },
   '/spam':  { tags: [], score: 0.04 },
-  '/tox':   { tags: [], score: 0.001 },
+  '/tox':   { tags: [], score: 0.002 },
 }
 
 beforeEach(() => {
@@ -33,14 +31,10 @@ beforeEach(() => {
 })
 afterEach(() => { delete global.fetch })
 
-let tmp
-beforeEach(() => { tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mdsite-enrich-')) })
-afterEach(() => { fs.rmSync(tmp, { recursive: true, force: true }) })
-
 
 describe('enrich_fields', () => {
   test('test_enrich_fields_fills_missing_only', async () => {
-    /** Empty frontmatter gets all configured fields from their mapped routes. */
+    /** An empty record gets all configured fields from their mapped routes. */
     const added = await enrich_fields(CFG, {}, README)
     expect(added).toEqual({
       description: 'A static site generator.',
@@ -49,10 +43,10 @@ describe('enrich_fields', () => {
     })
   })
 
-  test('test_enrich_fields_respects_frontmatter', async () => {
-    /** Fields present in frontmatter are never fetched or overwritten. */
-    const fm = { description: 'Hand-written.', tags: ['manual'] }
-    const added = await enrich_fields(CFG, fm, README)
+  test('test_enrich_fields_respects_record', async () => {
+    /** Fields already present in the record are never fetched or overwritten. */
+    const record = { description: 'Hand-written.', tags: ['manual'] }
+    const added = await enrich_fields(CFG, record, README)
     expect(added).toEqual({ categories: ['static sites', 'docs', 'markdown'] })
     expect(fetch).toHaveBeenCalledTimes(1)
   })
@@ -60,21 +54,42 @@ describe('enrich_fields', () => {
 
 
 describe('page_metrics', () => {
-  test('test_page_metrics_document_and_sections', async () => {
-    /** Configured metrics are scored for the document and each ## section. */
+  test('test_page_metrics_sections_and_mean', async () => {
+    /** Metrics are scored per ## section and aggregated to a document-level mean. */
     const cfg = { ...CFG, metrics: ['polarity', 'spam', 'toxicity'] }
     const result = await page_metrics(cfg, '# T\n\nIntro.\n\n## One\n\nA.\n\n## Two\n\nB.\n')
-    expect(result.polarity).toEqual({ negative: 0.1, neutral: 0.4, positive: 0.5 })
-    expect(result.spam).toBe(0.04)
-    expect(result.toxicity).toBe(0.001)
     expect(result.sections.map(s => s.heading)).toEqual(['One', 'Two'])
-    expect(result.sections[0].spam).toBe(0.04)
+    expect(result.metrics.polarity).toEqual({ negative: 0.1, neutral: 0.4, positive: 0.5 })
+    expect(result.metrics.spam).toBe(0.04)
+    expect(result.metrics.toxicity).toBe(0.002)
+  })
+
+  test('test_page_metrics_whole_doc_when_no_sections', async () => {
+    /** A page without ## headings is scored as a single unnamed section. */
+    const cfg = { ...CFG, metrics: ['spam'] }
+    const result = await page_metrics(cfg, 'Just a short page with no headings.')
+    expect(result.sections).toEqual([{ heading: '', spam: 0.04 }])
+    expect(result.metrics.spam).toBe(0.04)
   })
 
   test('test_page_metrics_null_when_unconfigured', async () => {
     /** No metrics configured -> null result and no network calls. */
     expect(await page_metrics(CFG, README)).toBeNull()
     expect(fetch).not.toHaveBeenCalled()
+  })
+})
+
+
+describe('mean_scores', () => {
+  test('test_mean_scores_numbers', () => {
+    /** Numeric scores aggregate to their rounded mean. */
+    expect(mean_scores([0.1, 0.2, 0.6])).toBe(0.3)
+  })
+
+  test('test_mean_scores_objects', () => {
+    /** Flat score objects aggregate element-wise (e.g. polarity). */
+    const result = mean_scores([{ positive: 0.2, negative: 0.8 }, { positive: 0.4, negative: 0.6 }])
+    expect(result).toEqual({ positive: 0.3, negative: 0.7 })
   })
 })
 
@@ -94,26 +109,12 @@ describe('split_sections', () => {
     const sections = split_sections('## Real\n\n```\n## fake\n```\ntail\n')
     expect(sections.map(s => s.heading)).toEqual(['Real'])
   })
-})
 
-
-describe('frontmatter creation and injection', () => {
-  test('test_ensure_fm_creates_block_from_h1', () => {
-    /** A file with no frontmatter (like README.md) gets a block titled from its first h1. */
-    const p = path.join(tmp, 'about.mdx')
-    fs.writeFileSync(p, README)
-    ensure_fm(p, 'readme')
-    expect(parse_fm(fs.readFileSync(p, 'utf8')).title).toBe('mdsite')
-  })
-
-  test('test_inject_fm_round_trips_through_parse', () => {
-    /** Injected scalar and list fields parse back with identical values. */
-    const p = path.join(tmp, 'page.mdx')
-    fs.writeFileSync(p, '---\ntitle: T\n---\n\nBody.\n')
-    inject_fm(p, { description: 'A "quoted" summary.', tags: ['a', 'b'] })
-    const fm = parse_fm(fs.readFileSync(p, 'utf8'))
-    expect(fm.tags).toEqual(['a', 'b'])
-    expect(fm.description).toContain('quoted')
+  test('test_split_sections_readme_fixture', () => {
+    /** The README fixture splits into its actual ## sections. */
+    const sections = split_sections(README)
+    expect(sections.length).toBeGreaterThan(1)
+    for (const s of sections) expect(s.heading).toBeTruthy()
   })
 })
 

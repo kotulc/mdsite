@@ -19,11 +19,13 @@ related:
 # Metadata Display
 
 Metadata is surfaced automatically on every page — no MDX imports required.
-All display is driven by frontmatter fields read by `theme.config.jsx`. Frontmatter
-itself is optional: pages without it get a generated title, and the
-[enrichment step](/configuration#enrichment) can fill the remaining fields from content.
+All metadata lives in the generated `public/page-meta.json`, which `theme.config.jsx`
+reads by page url. Source frontmatter is optional input: when present it is converted
+into the metadata record and stripped from the output page; pages without it get a
+generated title, and the [enrichment step](/configuration#enrichment) can fill the
+remaining fields from content.
 
-## Frontmatter schema
+## Metadata schema
 
 | Field | Type | Effect |
 |-------|------|--------|
@@ -32,9 +34,9 @@ itself is optional: pages without it get a generated title, and the
 | `description` | string | Per-page SEO meta description |
 | `categories` | list | Category chips below the title |
 | `tags` | list | Tag chips below the title |
-| `reading_time` | integer | Auto-injected by the pipeline; displays as "N min read" |
+| `reading_time` | integer | Computed by the pipeline; displays as "N min read" |
 
-Example:
+Example source frontmatter (all fields land in `page-meta.json`):
 
 ```yaml
 ---
@@ -56,10 +58,6 @@ separated by a center dot. Returns null when neither field is present.
 **`TagList`** renders categories (blue) and tags (gray) as pill chips.
 Both arrays are optional; the component returns null when both are empty.
 
-**`PostIndex`** fetches `posts-index.json` at runtime and renders a listing of
-all dated posts with title, date, reading time, and category chips. It is placed
-on the auto-generated `posts/index.mdx` page whenever dated posts are found.
-
 **`SiteFooter`** renders the page footer (copyright, build timestamp, credits).
 Edit `components/SiteFooter.jsx` directly to customize the footer across all pages.
 
@@ -70,9 +68,3 @@ scores for each page and its `##` sections and writes them to `public/page-meta.
 keyed by page url. Components can fetch the file at `${basePath}/page-meta.json`.
 See the [Metadata Contract](/specifications/metadata) spec for the schema.
 
-## Post index
-
-Any source file with a `date` field that is not at the source root is included
-in `public/posts-index.json`. The file is sorted newest-first and served as a
-static asset, so the PostIndex component can fetch it client-side without any
-server-side rendering.

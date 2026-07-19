@@ -64,7 +64,7 @@ describe('load_config — enrich block', () => {
     /** Config without an enrich block resolves to disabled strict enrichment. */
     const cfg = load_config(write_yaml('title: t'))
     expect(cfg.enrich).toEqual({
-      url: '', fields: ['description', 'tags', 'categories'], metrics: [], strict: true,
+      url: '', fields: ['description', 'tags', 'categories'], metrics: [], strict: true, on_build: false,
     })
   })
 

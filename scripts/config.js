@@ -19,7 +19,7 @@ const DEFAULTS = {
   toc:            true,
   reading_time:   true,
   theme:          { color: 'default', typeset: 'sans', navbar: '', footer: '' },
-  enrich:         { url: '', fields: ['description', 'tags', 'categories'], metrics: [], strict: true },
+  enrich:         { url: '', fields: ['description', 'tags', 'categories'], metrics: [], strict: true, on_build: false },
   flatten:        [],
   nav_order:      {},
   content:        './docs',

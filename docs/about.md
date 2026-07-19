@@ -1,18 +1,3 @@
----
-title: About
-categories:
-  - site
-tags:
-  - nextjs
-  - markdown
-  - static-site
-related:
-  - title: Getting Started
-    url: /getting-started
-  - title: Features
-    url: /features
----
-
 # mdsite
 
 A portable static site generator for markdown — drop it into any CI/CD pipeline as a build step.

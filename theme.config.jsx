@@ -1,4 +1,4 @@
-import { useConfig } from 'nextra-theme-docs'
+import { useRouter } from 'next/router'
 import PageHeader from './components/PageHeader'
 import TagList from './components/TagList'
 import SiteFooter from './components/SiteFooter'
@@ -6,16 +6,24 @@ import GitHubLink from './components/GitHubLink'
 import FeedLink from './components/FeedLink'
 import ThemeToggle from './components/ThemeToggle'
 import siteConfig from './site.config'
+import pageMeta from './public/page-meta.json'
+
+
+function use_page_meta() {
+  /** Metadata record for the current page from the generated page-meta.json. */
+  const { route } = useRouter()
+  return pageMeta[route] || {}
+}
 
 
 function PageMeta() {
   /** Renders date, reading time (unless disabled), and tag chips. */
-  const { frontMatter } = useConfig()
-  const mins = siteConfig.reading_time === false ? null : frontMatter.reading_time
+  const meta = use_page_meta()
+  const mins = siteConfig.reading_time === false ? null : meta.reading_time
   return (
     <>
-      <PageHeader date={frontMatter.date} reading_time={mins} />
-      <TagList categories={frontMatter.categories} tags={frontMatter.tags} />
+      <PageHeader date={meta.date} reading_time={mins} />
+      <TagList categories={meta.categories} tags={meta.tags} />
     </>
   )
 }
@@ -77,10 +85,10 @@ export default {
   },
   footer: { text: <SiteFooter /> },
   useNextSeoProps() {
-    const { frontMatter } = useConfig()
+    const meta = use_page_meta()
     return {
       titleTemplate: `%s – ${siteConfig.title}`,
-      description: frontMatter.description || siteConfig.description || undefined,
+      description: meta.description || siteConfig.description || undefined,
     }
   },
   head: (

@@ -1,6 +1,6 @@
 /**
  * mdsite CLI — entry point for the Docker container.
- * Usage: node scripts/cli.js build --config <path> [--content <path>] [--output <path>]
+ * Usage: node scripts/cli.js build --config <path> [--content <path>] [--output <path>] [--enrich]
  */
 const path               = require('path')
 const { spawnSync }      = require('child_process')
@@ -12,14 +12,14 @@ const ROOT = path.join(__dirname, '..')
 
 
 function parse_args(argv) {
-  /** Parse command and named flags from process.argv. */
+  /** Parse command and named flags from process.argv (flags without a value are true). */
   const args    = argv.slice(2)
   const command = args[0]
   const flags   = {}
   for (let i = 1; i < args.length; i++) {
-    if (args[i].startsWith('--') && args[i + 1] && !args[i + 1].startsWith('--')) {
-      flags[args[i].slice(2)] = args[++i]
-    }
+    if (!args[i].startsWith('--')) continue
+    if (args[i + 1] && !args[i + 1].startsWith('--')) flags[args[i].slice(2)] = args[++i]
+    else flags[args[i].slice(2)] = true
   }
   return { command, flags }
 }
@@ -35,6 +35,16 @@ async function cmd_build(flags) {
   const config = load_config(flags.config)
   if (flags.content) config.content = path.resolve(flags.content)
   if (flags.output)  config.output  = path.resolve(flags.output)
+
+  // Enrichment runs only when requested: --enrich flag or enrich.on_build in the YAML
+  if (flags.enrich && !config.enrich.url) {
+    console.error('Error: --enrich requires enrich.url in the config')
+    process.exit(1)
+  }
+  if (!flags.enrich && !config.enrich.on_build) {
+    if (config.enrich.url) console.log('Enrichment configured but skipped — pass --enrich or set enrich.on_build')
+    config.enrich = { ...config.enrich, url: '' }
+  }
 
   process.env.MDSITE_OUTPUT = config.output
   write_site_config(config)

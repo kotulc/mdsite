@@ -9,6 +9,12 @@ theme:
   color: default
   typeset: sans
 
+# NLP enrichment (runs only with --enrich or on_build: true; CI gates on the ENRICH var)
+enrich:
+  url: http://127.0.0.1:8000
+  metrics: [polarity, spam, toxicity]
+  on_build: true
+
 content: ./docs
 output: ./dist
 

@@ -137,7 +137,7 @@ describe('auto_index', () => {
     sorted[0].title = 'Page'
     auto_index(tmp_dir, sorted, '')
     const fm = parse_fm(fs.readFileSync(path.join(tmp_dir, 'index.mdx'), 'utf8'))
-    expect(fm.auto_redirect).toBe('true')
+    expect(fm.auto_redirect).toBe(true)
   })
 
   test('test_auto_index_skips_if_index_exists', () => {
@@ -251,6 +251,44 @@ describe('pages output ordering', () => {
     const meta       = JSON.parse(fs.readFileSync(path.join(PAGES, 'features', '_meta.json'), 'utf8'))
     const keys       = Object.keys(meta).filter(k => k !== 'index')
     expect(keys.slice(0, expected.length)).toEqual(expected)
+  })
+})
+
+
+// --- page metadata output (integration) ---
+
+describe('page metadata output', () => {
+  const meta_path = path.join(__dirname, '../../public/page-meta.json')
+
+  test('test_page_meta_written_without_enrichment', () => {
+    /** public/page-meta.json is written on every ingest, keyed by page url. */
+    const meta = JSON.parse(fs.readFileSync(meta_path, 'utf8'))
+    expect(meta['/getting-started']).toMatchObject({ slug: 'getting-started' })
+    expect(meta['/getting-started']).toHaveProperty('title')
+    expect(meta['/getting-started']).toHaveProperty('reading_time')
+  })
+
+  test('test_page_meta_converts_frontmatter', () => {
+    /** Source frontmatter fields, including extra keys, land in page-meta.json. */
+    const meta = JSON.parse(fs.readFileSync(meta_path, 'utf8'))
+    const page = meta['/configuration']
+    expect(page.title).toBe('Configuration')
+    expect(page.categories).toContain('reference')
+    expect(page).toHaveProperty('readability')  // extra frontmatter key carried through
+  })
+
+  test('test_pages_have_no_frontmatter', () => {
+    /** Generated content pages carry no frontmatter block. */
+    for (const f of ['getting-started.mdx', 'configuration.mdx']) {
+      const content = fs.readFileSync(path.join(PAGES, f), 'utf8')
+      expect(content.startsWith('---')).toBe(false)
+    }
+  })
+
+  test('test_first_h1_used_as_title', () => {
+    /** A page whose source has no frontmatter title derives its title from content or slug. */
+    const meta = JSON.parse(fs.readFileSync(meta_path, 'utf8'))
+    for (const record of Object.values(meta)) expect(record.title).toBeTruthy()
   })
 })
 

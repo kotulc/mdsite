@@ -34,9 +34,10 @@ consumed by Next.js and Nextra.
 | `toc` | boolean | `true` | Right sidebar: "On This Page" section navigation |
 | `reading_time` | boolean | `true` | Show estimated reading time in page headers and feeds |
 | `enrich.url` | string | `""` | Base URL of a running [taggly](https://github.com/kotulc/taggly) instance; empty disables enrichment |
-| `enrich.fields` | list | `[description, tags, categories]` | Frontmatter fields to generate when missing |
-| `enrich.metrics` | list | `[]` | Page/section scores to compute: `polarity`, `spam`, `toxicity` |
+| `enrich.fields` | list | `[description, tags, categories]` | Metadata fields to generate when the source provides none |
+| `enrich.metrics` | list | `[]` | Section scores to compute and aggregate: `polarity`, `spam`, `toxicity` |
 | `enrich.strict` | boolean | `true` | Fail the build when the service is unreachable; `false` warns and skips |
+| `enrich.on_build` | boolean | `false` | Enrich on every CLI build; otherwise only with the `--enrich` flag |
 | `theme.color` | string | `"default"` | Named accent palette — see [Theme](#theme) below |
 | `theme.typeset` | string | `"sans"` | Named body font stack — see [Theme](#theme) below |
 | `theme.navbar` | string | `""` | Navbar background: `"primary"` (theme tint) or any CSS color |
@@ -107,17 +108,36 @@ Leave empty to keep Nextra's default white/dark backgrounds.
 
 The `enrich` block connects the build to a local [taggly](https://github.com/kotulc/taggly)
 NLP service so pages need no hand-written frontmatter — missing `description`, `tags`, and
-`categories` are generated from the page content (explicit frontmatter always wins):
+`categories` are generated from the page content, and optional metrics are scored per
+`##` section then averaged to the document level. All results land in
+`public/page-meta.json` (never in frontmatter); explicit source frontmatter always wins.
 
 ```yaml
 enrich:
   url: http://127.0.0.1:8000
-  metrics: [polarity, spam, toxicity]   # optional page/section scores
+  metrics: [polarity, spam, toxicity]   # optional section scores + document mean
+  on_build: false                       # true: enrich every CLI build
 ```
 
-Metrics are written to `public/page-meta.json`, keyed by page url, with scores for the
-whole page and each `##` section. With `url` unset the build makes no network calls.
+Enrichment is opt-in per build — pass `--enrich` to the CLI, or set `on_build: true`:
+
+```bash
+node scripts/cli.js build --config mdsite.yaml --enrich
+```
+
+Without either, the build makes no network calls (page-meta.json is still generated
+from frontmatter and derived fields) and logs that enrichment was skipped.
+`npm run ingest` and the watcher read `mdsite.yaml` when present, so `on_build: true`
+enriches there too; `--enrich` is CLI-only.
 See the [Metadata Contract](/specifications/metadata) spec for the full schema.
+
+### Enrichment in CI
+
+The deploy workflow supports enrichment behind the `ENRICH` repository variable: when
+set to `true`, it installs taggly from source, starts it in the background, waits for
+`/status`, and passes `--enrich` to the CLI build. Model downloads are cached between
+runs (`~/.cache/huggingface`). External projects using the mdsite Docker image can do
+the same — run taggly next to the build container and point `enrich.url` at it.
 
 ## Nav ordering
 
@@ -158,6 +178,7 @@ Set them under **Settings → Secrets and variables → Actions → Variables**.
 |----------|---------|-------------|
 | `CONTENT_SOURCE` | `docs` | Path to content directory, relative to repo root |
 | `BASE_PATH` | _(empty)_ | Subpath prefix for project pages repos (e.g. `/mdsite`) |
+| `ENRICH` | _(empty)_ | Set to `true` to run taggly NLP enrichment during deployment |
 
 ## CLI overrides
 

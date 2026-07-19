@@ -18,13 +18,28 @@ jobs:
 
       - run: npm ci
 
-      - name: Ingest content
+      # Optional NLP enrichment: set repo variable ENRICH=true to generate page
+      # metadata (description/tags/categories + metrics) via taggly during the build
+      - uses: actions/cache@v4
+        if: vars.ENRICH == 'true'
+        with:
+          path: ~/.cache/huggingface
+          key: taggly-models
+
+      - name: Start taggly enrichment service
+        if: vars.ENRICH == 'true'
         run: |
-          SRC="${{ vars.CONTENT_SOURCE }}"
-          npm run ingest ${SRC:+-- "$SRC"}
+          git clone --depth 1 https://github.com/kotulc/taggly /tmp/taggly
+          pip install /tmp/taggly
+          nohup taggly start > /tmp/taggly.log 2>&1 &
+          timeout 300 bash -c 'until curl -sf http://127.0.0.1:8000/status > /dev/null; do sleep 5; done'
 
       - name: Build
-        run: npm run build
+        run: |
+          FLAGS=""
+          if [ -n "${{ vars.CONTENT_SOURCE }}" ]; then FLAGS="--content ${{ vars.CONTENT_SOURCE }}"; fi
+          if [ "${{ vars.ENRICH }}" = "true" ]; then FLAGS="$FLAGS --enrich"; fi
+          node scripts/cli.js build --config mdsite.yaml $FLAGS
         env:
           BASE_PATH: ${{ vars.BASE_PATH }}
 

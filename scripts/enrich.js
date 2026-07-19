@@ -1,17 +1,17 @@
 /**
  * Optional NLP enrichment via a local taggly service (github.com/kotulc/taggly).
- * Fills missing frontmatter fields (description, tags, categories) on generated pages
- * and computes page/section metrics (polarity, spam, toxicity) for public/page-meta.json.
+ * Generates missing metadata fields (description, tags, categories) and computes
+ * per-section metrics (polarity, spam, toxicity), aggregated to the document level.
+ * Results land in public/page-meta.json — never in frontmatter.
  * Enabled by setting enrich.url in mdsite.yaml; disabled (no-op) when unset.
  */
-const fs = require('fs')
 
 
-// Frontmatter field -> taggly route + response mapping
+// Metadata field -> taggly route + response mapping
 const FIELDS = {
-  description: { route: '/desc',       pick: r => r.description },
+  description: { route: '/desc',        pick: r => r.description },
   tags:        { route: '/key?top_n=8', pick: r => r.keywords },
-  categories:  { route: '/tag',        pick: r => (r.tags.topics || []).slice(0, 3) },
+  categories:  { route: '/tag',         pick: r => (r.tags.topics || []).slice(0, 3) },
 }
 
 // Metric name -> taggly route + response mapping
@@ -21,8 +21,15 @@ const METRICS = {
   toxicity: { route: '/tox',   pick: r => r.score },
 }
 
-// Classifier models reject long inputs (HTTP 500 above ~1600 chars) — truncate metric text
+// Classifier models reject long inputs (~512 tokens) — score plain prose, truncated
 const METRIC_MAX = 1500
+
+function plain_text(text) {
+  /** Reduce markdown to plain prose: drop code fences and markdown syntax characters. */
+  return text.replace(/```[\s\S]*?```/g, ' ')
+             .replace(/[#*`[\]()!|>-]/g, ' ')
+             .replace(/\s+/g, ' ').trim()
+}
 
 
 async function call(url, route, content) {
@@ -50,11 +57,11 @@ async function check_service(url) {
 }
 
 
-async function enrich_fields(cfg, fm, content) {
-  /** Return values for configured fields missing from frontmatter fm. */
+async function enrich_fields(cfg, record, content) {
+  /** Return values for configured fields missing from the page record. */
   const added = {}
   for (const field of cfg.fields) {
-    const has = Array.isArray(fm[field]) ? fm[field].length : fm[field]
+    const has = Array.isArray(record[field]) ? record[field].length : record[field]
     if (has) continue
     const { route, pick } = FIELDS[field]
     added[field] = pick(await call(cfg.url, route, content))
@@ -64,26 +71,40 @@ async function enrich_fields(cfg, fm, content) {
 
 
 async function page_metrics(cfg, content) {
-  /** Compute configured metrics for a page and each of its ## sections.
-   *  Returns { <metric>..., sections: [{ heading, <metric>... }] } or null when unconfigured. */
+  /** Score each ## section (whole document when no sections), then aggregate to the
+   *  document level by mean. Returns { metrics, sections } or null when unconfigured. */
   if (!cfg.metrics.length) return null
-  const record = await score_text(cfg, content)
-  record.sections = []
-  for (const { heading, text } of split_sections(content)) {
-    record.sections.push({ heading, ...(await score_text(cfg, text)) })
+  const chunks = split_sections(content)
+  if (!chunks.length) chunks.push({ heading: '', text: content })
+
+  const sections = []
+  for (const { heading, text } of chunks) {
+    sections.push({ heading, ...(await score_text(cfg, text)) })
   }
-  return record
+  const metrics = Object.fromEntries(
+    cfg.metrics.map(m => [m, mean_scores(sections.map(s => s[m]))])
+  )
+  return { metrics, sections }
 }
 
 
 async function score_text(cfg, text) {
-  /** Compute each configured metric for a block of text (truncated to METRIC_MAX). */
+  /** Compute each configured metric for a block of text (as truncated plain prose). */
+  const prose = plain_text(text).slice(0, METRIC_MAX)
   const scores = {}
   for (const metric of cfg.metrics) {
     const { route, pick } = METRICS[metric]
-    scores[metric] = pick(await call(cfg.url, route, text.slice(0, METRIC_MAX)))
+    scores[metric] = pick(await call(cfg.url, route, prose))
   }
   return scores
+}
+
+
+function mean_scores(values) {
+  /** Element-wise mean of an array of numbers or of flat { key: number } objects. */
+  const mean = nums => Math.round(nums.reduce((a, b) => a + b, 0) / nums.length * 1e4) / 1e4
+  if (typeof values[0] === 'number') return mean(values)
+  return Object.fromEntries(Object.keys(values[0]).map(k => [k, mean(values.map(v => v[k]))]))
 }
 
 
@@ -109,18 +130,4 @@ function split_sections(content) {
 }
 
 
-function inject_fm(mdx_path, fields) {
-  /** Insert serialized fields before the closing --- of an existing frontmatter block. */
-  if (!Object.keys(fields).length) return
-  const lines = Object.entries(fields).map(([key, val]) =>
-    Array.isArray(val)
-      ? `${key}:\n${val.map(v => `  - ${JSON.stringify(v)}`).join('\n')}`
-      : `${key}: ${JSON.stringify(val)}`
-  )
-  const content = fs.readFileSync(mdx_path, 'utf8')
-  const updated = content.replace(/^(---\r?\n[\s\S]*?)(\r?\n---\r?\n)/, `$1\n${lines.join('\n')}$2`)
-  fs.writeFileSync(mdx_path, updated)
-}
-
-
-module.exports = { FIELDS, METRICS, check_service, enrich_fields, page_metrics, split_sections, inject_fm }
+module.exports = { FIELDS, METRICS, check_service, enrich_fields, page_metrics, mean_scores, split_sections }
